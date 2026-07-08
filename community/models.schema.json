@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AnimoFlow/comfyui-animoflow/community/models.schema.json",
+  "title": "AnimoFlow community model registry",
+  "description": "Schema for community/models.json. Each entry describes one community-built model container implementing the HTTP contract in community/CONTRACT.md.",
+  "type": "object",
+  "required": ["disclaimer", "models"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "disclaimer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "models": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/model" }
+    }
+  },
+  "$defs": {
+    "model": {
+      "type": "object",
+      "required": [
+        "name",
+        "description",
+        "repo_url",
+        "image",
+        "license",
+        "maintainer",
+        "contract_version"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "description": "Registry-unique identifier. Lowercase letters, digits, hyphens only. Must match the `name` in the container's MODELS.yaml.",
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "minLength": 2,
+          "maxLength": 64
+        },
+        "description": {
+          "description": "One or two sentences: what the model does and what it needs.",
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 500
+        },
+        "repo_url": {
+          "description": "Source repository of the container wrapper (must be https).",
+          "type": "string",
+          "pattern": "^https://",
+          "format": "uri"
+        },
+        "image": {
+          "description": "Pullable container image reference, e.g. ghcr.io/you/yourmodel-animoflow:0.1.0.",
+          "type": "string",
+          "minLength": 3
+        },
+        "license": {
+          "description": "License of the container + model (SPDX identifier where possible, e.g. MIT, BSD-3-Clause, or 'research-only').",
+          "type": "string",
+          "minLength": 2
+        },
+        "maintainer": {
+          "description": "Who to contact, e.g. 'Name <email>' or a GitHub handle.",
+          "type": "string",
+          "minLength": 2
+        },
+        "contract_version": {
+          "description": "HTTP contract version the container implements (community/CONTRACT.md).",
+          "const": 1
+        },
+        "gpu_required": {
+          "description": "True if CPU inference is impractical.",
+          "type": "boolean"
+        },
+        "paper_url": {
+          "description": "Optional link to the paper (must be https).",
+          "type": "string",
+          "pattern": "^https://",
+          "format": "uri"
+        },
+        "tags": {
+          "description": "Optional free-form tags, e.g. ['text-to-motion', 'humanml3d'].",
+          "type": "array",
+          "items": { "type": "string" },
+          "maxItems": 10
+        }
+      }
+    }
+  }
+}

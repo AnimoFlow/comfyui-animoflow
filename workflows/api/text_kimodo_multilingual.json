@@ -1,0 +1,77 @@
+{
+  "1": {
+    "class_type": "AnimoFlow_PromptRewrite",
+    "inputs": {
+      "prompt": "a person walks forward",
+      "mode": "auto"
+    }
+  },
+  "2": {
+    "class_type": "AnimoFlow_Kimodo",
+    "inputs": {
+      "prompt": [
+        "1",
+        0
+      ],
+      "duration": 4.0,
+      "model": "Kimodo-SOMA-RP-v1",
+      "output": "BVH (22-joint rig)",
+      "steps": 100,
+      "cfg_text": 2.0,
+      "cfg_constraint": 2.0,
+      "seed": 123
+    }
+  },
+  "3": {
+    "class_type": "AnimoFlow_Rig",
+    "inputs": {
+      "bvh_b64": [
+        "2",
+        0
+      ],
+      "output_dir": "",
+      "job_id": "",
+      "character": "Y_bot"
+    }
+  },
+  "4": {
+    "class_type": "AnimoFlow_GLBExport",
+    "inputs": {
+      "fbx_filename": [
+        "3",
+        0
+      ],
+      "enabled": true,
+      "output_dir": "",
+      "reduce_keyframes": false,
+      "error_degrees": 3.0,
+      "snap_to_ground": true,
+      "character": [
+        "3",
+        1
+      ],
+      "traj_restore_json": "",
+      "compress_output": false,
+      "downsize_textures": false
+    }
+  },
+  "5": {
+    "class_type": "AnimoFlow_FBXToPreview3D",
+    "inputs": {
+      "fbx_filename": [
+        "4",
+        0
+      ],
+      "output_dir": ""
+    }
+  },
+  "6": {
+    "class_type": "Preview3D",
+    "inputs": {
+      "model_file": [
+        "5",
+        0
+      ]
+    }
+  }
+}

@@ -1,0 +1,2127 @@
+{
+  "id": "73548b8e-c5a4-4135-98d4-0e6fed51a1b0",
+  "revision": 0,
+  "last_node_id": 43,
+  "last_link_id": 46,
+  "nodes": [
+    {
+      "id": 4,
+      "type": "AnimoFlow_SmplToOpenPose3D",
+      "pos": [
+        2045.179175893292,
+        97.50717288789784
+      ],
+      "size": [
+        400,
+        96
+      ],
+      "flags": {},
+      "order": 24,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "npz_b64",
+          "type": "ANIMOFLOW_NPZ",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "pose3d_b64",
+          "type": "ANIMOFLOW_POSE3D",
+          "slot_index": 0,
+          "links": [
+            4,
+            5
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimoFlow_SmplToOpenPose3D"
+      },
+      "widgets_values": [
+        1
+      ]
+    },
+    {
+      "id": 5,
+      "type": "AnimoFlow_Camera",
+      "pos": [
+        2475.179175893292,
+        97.50717288789784
+      ],
+      "size": [
+        400,
+        320
+      ],
+      "flags": {},
+      "order": 25,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "pose3d_b64",
+          "type": "ANIMOFLOW_POSE3D",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "camera_b64",
+          "type": "ANIMOFLOW_CAMERA",
+          "slot_index": 0,
+          "links": [
+            6
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimoFlow_Camera"
+      },
+      "widgets_values": [
+        "track",
+        90,
+        5,
+        0,
+        45,
+        832,
+        480,
+        5,
+        0.15
+      ]
+    },
+    {
+      "id": 6,
+      "type": "AnimoFlow_OpenPoseRender",
+      "pos": [
+        2905.1791758932904,
+        97.50717288789784
+      ],
+      "size": [
+        400,
+        152
+      ],
+      "flags": {},
+      "order": 26,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "pose3d_b64",
+          "type": "ANIMOFLOW_POSE3D",
+          "link": 5
+        },
+        {
+          "name": "camera_b64",
+          "type": "ANIMOFLOW_CAMERA",
+          "link": 6
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            23,
+            37,
+            44
+          ]
+        },
+        {
+          "name": "fps",
+          "type": "INT",
+          "slot_index": 1,
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimoFlow_OpenPoseRender"
+      },
+      "widgets_values": [
+        true,
+        81
+      ]
+    },
+    {
+      "id": 7,
+      "type": "UNETLoader",
+      "pos": [
+        70.4595499328366,
+        938.1121463202084
+      ],
+      "size": [
+        400,
+        96
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "slot_index": 0,
+          "links": [
+            36
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UNETLoader"
+      },
+      "widgets_values": [
+        "qwen_image_fp8_e4m3fn.safetensors",
+        "default"
+      ]
+    },
+    {
+      "id": 8,
+      "type": "CLIPTextEncode",
+      "pos": [
+        500.45954993283686,
+        758.1121463202089
+      ],
+      "size": [
+        400,
+        96
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            38
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "a b-boy in a vintage cream tracksuit and headband street dancing in a museum sculpture hall with symmetrical marble arches, in full side profile to the camera, perfectly symmetrical centered composition, pastel color palette, meticulous vintage production design, warm muted film stock, soft even lighting, photorealistic, cinematic 35mm still, full body visible"
+      ]
+    },
+    {
+      "id": 9,
+      "type": "ControlNetLoader",
+      "pos": [
+        70.4595499328366,
+        1298.1121463202062
+      ],
+      "size": [
+        400,
+        96
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CONTROL_NET",
+          "type": "CONTROL_NET",
+          "slot_index": 0,
+          "links": [
+            40
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ControlNetLoader"
+      },
+      "widgets_values": [
+        "Qwen-Image-InstantX-ControlNet-Union.safetensors"
+      ]
+    },
+    {
+      "id": 10,
+      "type": "CLIPTextEncode",
+      "pos": [
+        500.45954993283686,
+        988.1121463202073
+      ],
+      "size": [
+        400,
+        96
+      ],
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 8
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            39
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        ""
+      ]
+    },
+    {
+      "id": 11,
+      "type": "EmptySD3LatentImage",
+      "pos": [
+        930.4595499328371,
+        988.1121463202073
+      ],
+      "size": [
+        400,
+        124
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "slot_index": 0,
+          "links": [
+            12
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "EmptySD3LatentImage"
+      },
+      "widgets_values": [
+        832,
+        480,
+        1
+      ]
+    },
+    {
+      "id": 12,
+      "type": "KSampler",
+      "pos": [
+        1790.4595499328352,
+        758.1121463202089
+      ],
+      "size": [
+        400,
+        348
+      ],
+      "flags": {},
+      "order": 31,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 9
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 10
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 11
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "slot_index": 0,
+          "links": [
+            13
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        1309,
+        "fixed",
+        20,
+        2.5,
+        "euler",
+        "simple",
+        1
+      ]
+    },
+    {
+      "id": 13,
+      "type": "VAEDecode",
+      "pos": [
+        2220.4595499328366,
+        758.1121463202089
+      ],
+      "size": [
+        400,
+        96
+      ],
+      "flags": {},
+      "order": 32,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 13
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 14
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            22,
+            43
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 14,
+      "type": "CLIPLoader",
+      "pos": [
+        80,
+        1660
+      ],
+      "size": [
+        400,
+        106
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "slot_index": 0,
+          "links": [
+            15,
+            16
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPLoader"
+      },
+      "widgets_values": [
+        "umt5_xxl_fp8_e4m3fn_scaled.safetensors",
+        "wan",
+        "default"
+      ]
+    },
+    {
+      "id": 15,
+      "type": "CLIPTextEncode",
+      "pos": [
+        510,
+        1660
+      ],
+      "size": [
+        400,
+        96
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 15
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            19
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "a b-boy in a vintage cream tracksuit and headband throws energetic street-dance moves in a museum sculpture hall with symmetrical marble arches, lateral side tracking shot, pastel color palette, meticulous vintage production design, warm muted film stock, smooth cinematic motion, photorealistic"
+      ]
+    },
+    {
+      "id": 16,
+      "type": "CLIPTextEncode",
+      "pos": [
+        510,
+        1880
+      ],
+      "size": [
+        400,
+        96
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 16
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            20
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "blurry, distorted, extra limbs, deformed hands, low quality, static, flickering, watermark, cartoon, illustration, gritty"
+      ]
+    },
+    {
+      "id": 17,
+      "type": "VAELoader",
+      "pos": [
+        80,
+        1880
+      ],
+      "size": [
+        400,
+        96
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "slot_index": 0,
+          "links": [
+            21,
+            33
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "wan_2.1_vae.safetensors"
+      ]
+    },
+    {
+      "id": 18,
+      "type": "UNETLoader",
+      "pos": [
+        80,
+        2060
+      ],
+      "size": [
+        400,
+        96
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "slot_index": 0,
+          "links": [
+            17
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UNETLoader"
+      },
+      "widgets_values": [
+        "wan2.2_fun_control_high_noise_14B_fp8_scaled.safetensors",
+        "default"
+      ]
+    },
+    {
+      "id": 19,
+      "type": "ModelSamplingSD3",
+      "pos": [
+        510,
+        2060
+      ],
+      "size": [
+        400,
+        96
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 17
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "slot_index": 0,
+          "links": [
+            24
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ModelSamplingSD3"
+      },
+      "widgets_values": [
+        8
+      ]
+    },
+    {
+      "id": 20,
+      "type": "UNETLoader",
+      "pos": [
+        80,
+        2240
+      ],
+      "size": [
+        400,
+        96
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "slot_index": 0,
+          "links": [
+            18
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UNETLoader"
+      },
+      "widgets_values": [
+        "wan2.2_fun_control_low_noise_14B_fp8_scaled.safetensors",
+        "default"
+      ]
+    },
+    {
+      "id": 21,
+      "type": "ModelSamplingSD3",
+      "pos": [
+        510,
+        2240
+      ],
+      "size": [
+        400,
+        96
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 18
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "slot_index": 0,
+          "links": [
+            28
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ModelSamplingSD3"
+      },
+      "widgets_values": [
+        8
+      ]
+    },
+    {
+      "id": 22,
+      "type": "Wan22FunControlToVideo",
+      "pos": [
+        940,
+        1760
+      ],
+      "size": [
+        400,
+        292
+      ],
+      "flags": {},
+      "order": 33,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 19
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 20
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 21
+        },
+        {
+          "name": "ref_image",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 22
+        },
+        {
+          "name": "control_video",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 23
+        }
+      ],
+      "outputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            25,
+            29
+          ]
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "slot_index": 1,
+          "links": [
+            26,
+            30
+          ]
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "slot_index": 2,
+          "links": [
+            27
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Wan22FunControlToVideo"
+      },
+      "widgets_values": [
+        832,
+        480,
+        81,
+        1
+      ]
+    },
+    {
+      "id": 23,
+      "type": "KSamplerAdvanced",
+      "pos": [
+        1370,
+        1760
+      ],
+      "size": [
+        400,
+        432
+      ],
+      "flags": {},
+      "order": 35,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 24
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 25
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 26
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 27
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "slot_index": 0,
+          "links": [
+            31
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSamplerAdvanced"
+      },
+      "widgets_values": [
+        "enable",
+        1309,
+        "fixed",
+        20,
+        3.5,
+        "euler",
+        "simple",
+        0,
+        10,
+        "enable"
+      ]
+    },
+    {
+      "id": 24,
+      "type": "KSamplerAdvanced",
+      "pos": [
+        1800,
+        1760
+      ],
+      "size": [
+        400,
+        432
+      ],
+      "flags": {},
+      "order": 36,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 28
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 29
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 30
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 31
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "slot_index": 0,
+          "links": [
+            32
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSamplerAdvanced"
+      },
+      "widgets_values": [
+        "disable",
+        1309,
+        "fixed",
+        20,
+        3.5,
+        "euler",
+        "simple",
+        10,
+        10000,
+        "disable"
+      ]
+    },
+    {
+      "id": 25,
+      "type": "VAEDecode",
+      "pos": [
+        2230,
+        1760
+      ],
+      "size": [
+        400,
+        96
+      ],
+      "flags": {},
+      "order": 37,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 32
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 33
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            34
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 26,
+      "type": "CreateVideo",
+      "pos": [
+        2660,
+        1760
+      ],
+      "size": [
+        400,
+        102
+      ],
+      "flags": {},
+      "order": 38,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 34
+        },
+        {
+          "name": "audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "VIDEO",
+          "type": "VIDEO",
+          "slot_index": 0,
+          "links": [
+            35
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CreateVideo"
+      },
+      "widgets_values": [
+        16,
+        8
+      ]
+    },
+    {
+      "id": 27,
+      "type": "SaveVideo",
+      "pos": [
+        3090,
+        1760
+      ],
+      "size": [
+        400,
+        152
+      ],
+      "flags": {},
+      "order": 39,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 35
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/animoflow_wan",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 28,
+      "type": "CLIPLoader",
+      "pos": [
+        70.4595499328366,
+        758.1121463202089
+      ],
+      "size": [
+        400,
+        106
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "slot_index": 0,
+          "links": [
+            7,
+            8
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPLoader"
+      },
+      "widgets_values": [
+        "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+        "qwen_image",
+        "default"
+      ]
+    },
+    {
+      "id": 29,
+      "type": "VAELoader",
+      "pos": [
+        70.4595499328366,
+        1118.1121463202062
+      ],
+      "size": [
+        400,
+        96
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "slot_index": 0,
+          "links": [
+            14,
+            42
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "qwen_image_vae.safetensors"
+      ]
+    },
+    {
+      "id": 33,
+      "type": "ModelSamplingAuraFlow",
+      "pos": [
+        930.4595499328371,
+        758.1121463202089
+      ],
+      "size": [
+        400,
+        96
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 36
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "slot_index": 0,
+          "links": [
+            9
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ModelSamplingAuraFlow"
+      },
+      "widgets_values": [
+        3.1
+      ]
+    },
+    {
+      "id": 34,
+      "type": "ImageFromBatch",
+      "pos": [
+        500.45954993283686,
+        1208.1121463202062
+      ],
+      "size": [
+        400,
+        124
+      ],
+      "flags": {},
+      "order": 27,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 37
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            41
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageFromBatch"
+      },
+      "widgets_values": [
+        0,
+        1
+      ]
+    },
+    {
+      "id": 35,
+      "type": "ControlNetApplyAdvanced",
+      "pos": [
+        1360.4595499328352,
+        758.1121463202089
+      ],
+      "size": [
+        400,
+        264
+      ],
+      "flags": {},
+      "order": 29,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 38
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 39
+        },
+        {
+          "name": "control_net",
+          "type": "CONTROL_NET",
+          "link": 40
+        },
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 41
+        },
+        {
+          "name": "vae",
+          "shape": 7,
+          "type": "VAE",
+          "link": 42
+        }
+      ],
+      "outputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            10
+          ]
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "slot_index": 1,
+          "links": [
+            11
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ControlNetApplyAdvanced"
+      },
+      "widgets_values": [
+        1,
+        0,
+        1
+      ]
+    },
+    {
+      "id": 36,
+      "type": "SaveImage",
+      "pos": [
+        2220.4595499328366,
+        1138.1121463202062
+      ],
+      "size": [
+        400,
+        270
+      ],
+      "flags": {},
+      "order": 34,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 43
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "animoflow_ref_frame"
+      ]
+    },
+    {
+      "id": 37,
+      "type": "CreateVideo",
+      "pos": [
+        3335.1791758932904,
+        97.50717288789784
+      ],
+      "size": [
+        400,
+        102
+      ],
+      "flags": {},
+      "order": 28,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 44
+        },
+        {
+          "name": "audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "VIDEO",
+          "type": "VIDEO",
+          "slot_index": 0,
+          "links": [
+            45
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CreateVideo"
+      },
+      "widgets_values": [
+        16,
+        8
+      ]
+    },
+    {
+      "id": 38,
+      "type": "SaveVideo",
+      "pos": [
+        3765.1791758932927,
+        97.50717288789784
+      ],
+      "size": [
+        400,
+        328.7692307692308
+      ],
+      "flags": {},
+      "order": 30,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 45
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/animoflow_control",
+        "auto",
+        "auto"
+      ]
+    },
+    {
+      "id": 40,
+      "type": "MarkdownNote",
+      "pos": [
+        80,
+        -560
+      ],
+      "size": [
+        560,
+        420
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "READ ME — official seeded example",
+      "properties": {
+        "Node name for S&R": "MarkdownNote"
+      },
+      "widgets_values": [
+        "**Fully seeded (1309): a run reproduces the outputs shown on the right** (also checked in at `workflows/examples/text_kimodo_video/`).\n\nPipeline, left to right:\n1. **text → motion** — Kimodo generates the dance\n2. **text → image** — Qwen-Image paints the character, POSE-CONDITIONED on the control video's first frame (InstantX union ControlNet), so the still and the motion can't conflict; the image prompt states the orientation to the camera to match the camera azimuth (90 = side profile)\n3. **motion → video** — Wan 2.2 Fun-Control animates the character with the AnimoFlow motion\n\nWinning config of a 30-run seeded sweep (2026-07-04, id d09). Runtime ≈ 30 min on a 16 GB GPU (fp8, offload). Change the seed for new variations."
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 41,
+      "type": "LoadImage",
+      "pos": [
+        700,
+        -560
+      ],
+      "size": [
+        400,
+        420
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 2,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": []
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "slot_index": 1,
+          "links": []
+        }
+      ],
+      "title": "EXPECTED — reference frame",
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "animoflow_example_ref_frame.png",
+        "image"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 42,
+      "type": "LoadVideo",
+      "pos": [
+        1160,
+        -560
+      ],
+      "size": [
+        400,
+        420
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 2,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VIDEO",
+          "type": "VIDEO",
+          "slot_index": 0,
+          "links": []
+        }
+      ],
+      "title": "EXPECTED — control video",
+      "properties": {
+        "Node name for S&R": "LoadVideo"
+      },
+      "widgets_values": [
+        "animoflow_example_control.mp4",
+        "image"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 43,
+      "type": "LoadVideo",
+      "pos": [
+        1620,
+        -560
+      ],
+      "size": [
+        400,
+        420
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 2,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VIDEO",
+          "type": "VIDEO",
+          "slot_index": 0,
+          "links": []
+        }
+      ],
+      "title": "EXPECTED — final video",
+      "properties": {
+        "Node name for S&R": "LoadVideo"
+      },
+      "widgets_values": [
+        "animoflow_example_final.mp4",
+        "image"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 2,
+      "type": "AnimoFlow_Kimodo",
+      "pos": [
+        514.3304525812258,
+        109.74709583574108
+      ],
+      "size": [
+        400,
+        364
+      ],
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "bvh_b64",
+          "type": "ANIMOFLOW_BVH",
+          "slot_index": 0,
+          "links": []
+        },
+        {
+          "name": "soma_raw_b64",
+          "type": "ANIMOFLOW_SOMA",
+          "slot_index": 1,
+          "links": [
+            46
+          ]
+        },
+        {
+          "name": "npz_b64",
+          "type": "ANIMOFLOW_NPZ",
+          "slot_index": 2,
+          "links": []
+        },
+        {
+          "name": "native_fps",
+          "type": "INT",
+          "slot_index": 3,
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimoFlow_Kimodo"
+      },
+      "widgets_values": [
+        "a person walks forward",
+        5.2,
+        "Kimodo-SOMA-RP-v1",
+        "SOMA raw",
+        100,
+        2,
+        2,
+        1309,
+        "fixed",
+        ""
+      ]
+    },
+    {
+      "id": 1,
+      "type": "AnimoFlow_PromptRewrite",
+      "pos": [
+        54.672310953502475,
+        155.34825756409353
+      ],
+      "size": [
+        400,
+        132
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "rewritten_prompt",
+          "type": "STRING",
+          "slot_index": 0,
+          "links": [
+            1
+          ]
+        },
+        {
+          "name": "rewrite_info",
+          "type": "STRING",
+          "slot_index": 1,
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimoFlow_PromptRewrite"
+      },
+      "widgets_values": [
+        "a person does an energetic street dance",
+        "auto"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "AnimoFlow_Resample",
+      "pos": [
+        1453.7535032340293,
+        169.05198117892076
+      ],
+      "size": [
+        400,
+        124
+      ],
+      "flags": {},
+      "order": 23,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "npz_b64",
+          "type": "ANIMOFLOW_NPZ",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "npz_b64",
+          "type": "ANIMOFLOW_NPZ",
+          "slot_index": 0,
+          "links": [
+            3
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimoFlow_Resample"
+      },
+      "widgets_values": [
+        30,
+        16
+      ]
+    },
+    {
+      "id": 39,
+      "type": "AnimoFlow_SomaToSmpl",
+      "pos": [
+        969.7042091896918,
+        165.79987970208245
+      ],
+      "size": [
+        400,
+        96
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "soma_raw_b64",
+          "type": "ANIMOFLOW_SOMA",
+          "link": 46
+        }
+      ],
+      "outputs": [
+        {
+          "name": "npz_b64",
+          "type": "ANIMOFLOW_NPZ",
+          "slot_index": 0,
+          "links": [
+            2
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimoFlow_SomaToSmpl"
+      },
+      "widgets_values": []
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      2,
+      0,
+      "STRING"
+    ],
+    [
+      2,
+      39,
+      0,
+      3,
+      0,
+      "ANIMOFLOW_NPZ"
+    ],
+    [
+      3,
+      3,
+      0,
+      4,
+      0,
+      "ANIMOFLOW_NPZ"
+    ],
+    [
+      4,
+      4,
+      0,
+      5,
+      0,
+      "ANIMOFLOW_POSE3D"
+    ],
+    [
+      5,
+      4,
+      0,
+      6,
+      0,
+      "ANIMOFLOW_POSE3D"
+    ],
+    [
+      6,
+      5,
+      0,
+      6,
+      1,
+      "ANIMOFLOW_CAMERA"
+    ],
+    [
+      7,
+      28,
+      0,
+      8,
+      0,
+      "CLIP"
+    ],
+    [
+      8,
+      28,
+      0,
+      10,
+      0,
+      "CLIP"
+    ],
+    [
+      9,
+      33,
+      0,
+      12,
+      0,
+      "MODEL"
+    ],
+    [
+      10,
+      35,
+      0,
+      12,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      11,
+      35,
+      1,
+      12,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      12,
+      11,
+      0,
+      12,
+      3,
+      "LATENT"
+    ],
+    [
+      13,
+      12,
+      0,
+      13,
+      0,
+      "LATENT"
+    ],
+    [
+      14,
+      29,
+      0,
+      13,
+      1,
+      "VAE"
+    ],
+    [
+      15,
+      14,
+      0,
+      15,
+      0,
+      "CLIP"
+    ],
+    [
+      16,
+      14,
+      0,
+      16,
+      0,
+      "CLIP"
+    ],
+    [
+      17,
+      18,
+      0,
+      19,
+      0,
+      "MODEL"
+    ],
+    [
+      18,
+      20,
+      0,
+      21,
+      0,
+      "MODEL"
+    ],
+    [
+      19,
+      15,
+      0,
+      22,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      20,
+      16,
+      0,
+      22,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      21,
+      17,
+      0,
+      22,
+      2,
+      "VAE"
+    ],
+    [
+      22,
+      13,
+      0,
+      22,
+      3,
+      "IMAGE"
+    ],
+    [
+      23,
+      6,
+      0,
+      22,
+      4,
+      "IMAGE"
+    ],
+    [
+      24,
+      19,
+      0,
+      23,
+      0,
+      "MODEL"
+    ],
+    [
+      25,
+      22,
+      0,
+      23,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      26,
+      22,
+      1,
+      23,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      27,
+      22,
+      2,
+      23,
+      3,
+      "LATENT"
+    ],
+    [
+      28,
+      21,
+      0,
+      24,
+      0,
+      "MODEL"
+    ],
+    [
+      29,
+      22,
+      0,
+      24,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      30,
+      22,
+      1,
+      24,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      31,
+      23,
+      0,
+      24,
+      3,
+      "LATENT"
+    ],
+    [
+      32,
+      24,
+      0,
+      25,
+      0,
+      "LATENT"
+    ],
+    [
+      33,
+      17,
+      0,
+      25,
+      1,
+      "VAE"
+    ],
+    [
+      34,
+      25,
+      0,
+      26,
+      0,
+      "IMAGE"
+    ],
+    [
+      35,
+      26,
+      0,
+      27,
+      0,
+      "VIDEO"
+    ],
+    [
+      36,
+      7,
+      0,
+      33,
+      0,
+      "MODEL"
+    ],
+    [
+      37,
+      6,
+      0,
+      34,
+      0,
+      "IMAGE"
+    ],
+    [
+      38,
+      8,
+      0,
+      35,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      39,
+      10,
+      0,
+      35,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      40,
+      9,
+      0,
+      35,
+      2,
+      "CONTROL_NET"
+    ],
+    [
+      41,
+      34,
+      0,
+      35,
+      3,
+      "IMAGE"
+    ],
+    [
+      42,
+      29,
+      0,
+      35,
+      4,
+      "VAE"
+    ],
+    [
+      43,
+      13,
+      0,
+      36,
+      0,
+      "IMAGE"
+    ],
+    [
+      44,
+      6,
+      0,
+      37,
+      0,
+      "IMAGE"
+    ],
+    [
+      45,
+      37,
+      0,
+      38,
+      0,
+      "VIDEO"
+    ],
+    [
+      46,
+      2,
+      1,
+      39,
+      0,
+      "ANIMOFLOW_SOMA"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "Expected results — what a run reproduces",
+      "bounding": [
+        40,
+        -640,
+        2040,
+        540
+      ],
+      "color": "#88A",
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "1 · Text → Motion (Kimodo)",
+      "bounding": [
+        40,
+        0,
+        1874.6706590655401,
+        564.0488230733554
+      ],
+      "color": "#8A8",
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "2 · Text → Image (pose-conditioned reference frame)",
+      "bounding": [
+        30.459549932836637,
+        678.1121463202089,
+        2620,
+        780
+      ],
+      "color": "#A88",
+      "flags": {}
+    },
+    {
+      "id": 4,
+      "title": "Motion → Control video (camera + OpenPose — feeds both stages below)",
+      "bounding": [
+        2005.1791758932918,
+        17.507172887897934,
+        2181.903091195099,
+        533.0849356134623
+      ],
+      "color": "#AA8",
+      "flags": {}
+    },
+    {
+      "id": 5,
+      "title": "3 · Motion → Video (Wan 2.2 Fun-Control)",
+      "bounding": [
+        40,
+        1580,
+        3520,
+        800
+      ],
+      "color": "#8AA",
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "generated_by": "scripts/gen_workflows.py",
+    "ds": {
+      "scale": 0.3386075842604875,
+      "offset": [
+        1217.002497373529,
+        1026.3626306630754
+      ]
+    },
+    "frontendVersion": "1.45.20"
+  },
+  "version": 0.4
+}

@@ -1,0 +1,12 @@
+# Node-pack dependencies only — installed into ComfyUI's Python environment
+# by ComfyUI-Manager (or `pip install -r requirements.txt` in that env).
+# The heavy model dependencies live in the Docker containers (see install.sh),
+# NOT here. torch is intentionally absent: ComfyUI always provides it.
+numpy
+scipy
+requests
+Pillow
+# AnimoFlow_OpenPoseRender (falls back to PIL drawing if missing, but cv2 is faster)
+opencv-python-headless
+# AnimoFlow_PromptRewrite (multilingual prompt rewriting; loads lazily on first use)
+sentence-transformers

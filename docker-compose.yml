@@ -1,0 +1,127 @@
+# AnimoFlow model containers — brought up by ./install.sh (standalone) or
+# the maintainer scripts. ComfyUI + animoflow-api run natively alongside.
+
+services:
+
+  mdm:
+    build:
+      context: ./containers/mdm
+      dockerfile: Dockerfile.cpu
+    ports:
+      - "${MDM_PORT:-8001}:8000"
+    # MDM checkpoint weights are NOT baked into the image (the upstream model
+    # isn't distributed via a clean gdown file-id, and the ~1 GB weights would
+    # bloat the image). They're bind-mounted from the host instead.
+    # Override the host path via MDM_WEIGHTS_DIR in .env if weights live
+    # somewhere other than the default.
+    #
+    # The directory should contain `model000750000.pt` (and optionally `args.json`).
+    # See containers/mdm/inference.py :: MODEL_PT for the exact path inside the
+    # container (/app/weights/humanml_enc_512_50steps/model000750000.pt).
+    volumes:
+      - ${MDM_WEIGHTS_DIR:-${HOME}/animoflow/models/mdm/humanml_enc_512_50steps}:/app/weights/humanml_enc_512_50steps:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    networks:
+      - animoflow
+
+  momask:
+    build:
+      context: ./containers/momask
+      dockerfile: Dockerfile.cpu
+    environment:
+      - MOMASK_MODEL=momask
+    ports:
+      - "${MOMASK_PORT:-8003}:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 120s
+    networks:
+      - animoflow
+
+  priormdm:
+    build:
+      context: ./containers/priormdm
+      dockerfile: Dockerfile
+    ports:
+      - "${PRIORMDM_PORT:-8002}:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--max-time", "5", "http://localhost:8000/health"]
+      interval: 60s
+      timeout: 10s
+      retries: 30
+      start_period: 120s
+    networks:
+      - animoflow
+
+  kimodo:
+    build:
+      context: ./containers/kimodo
+      dockerfile: Dockerfile
+    ports:
+      - "${KIMODO_PORT:-8005}:8000"
+    environment:
+      - KIMODO_MODEL=${KIMODO_MODEL:-Kimodo-SOMA-RP-v1}
+      - HF_TOKEN=${HF_TOKEN:-}
+    volumes:
+      - kimodo_hf_cache:/root/.cache/huggingface
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 300s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    networks:
+      - animoflow
+    profiles:
+      - gpu
+
+  # Retargeter container — IK (momask Joint2BVHConvertor) + Blender BVH→FBX.
+  retargeter:
+    build:
+      context: ./containers/retargeter
+      dockerfile: Dockerfile.cpu
+    ports:
+      - "${RETARGETER_PORT:-8006}:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - animoflow
+
+  # Populates the shared animoflow_characters volume on startup so both
+  # this stack (AnimoFlow_Rig node) and the animoflow-api stack (GET /v1/characters)
+  # read from the same directory.
+  characters_init:
+    image: alpine
+    command: ["sh", "-c", "cp -r /src/. /characters/ && echo 'Characters synced'"]
+    volumes:
+      - ./characters:/src:ro
+      - animoflow_characters:/characters
+    networks:
+      - animoflow
+
+networks:
+  animoflow:
+    driver: bridge
+
+volumes:
+  kimodo_hf_cache:
+  animoflow_characters:

@@ -1,0 +1,21 @@
+# GPU override for the AnimoFlow stack — for CUDA hosts (e.g. an L4, 24 GB VRAM).
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d
+#
+# This file adds NVIDIA GPU access to the kimodo service and
+# removes the 'gpu' profile restriction so it starts automatically.
+
+version: "3.9"
+
+services:
+
+  kimodo:
+    profiles: []   # override: remove 'gpu' profile gate so it always starts
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

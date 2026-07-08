@@ -1,0 +1,44 @@
+FROM python:3.11-slim
+
+RUN apt-get update && apt-get install -y \
+    git curl blender \
+    python3-numpy python3-scipy \
+    build-essential cmake \
+    libopenblas-dev liblapack-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Clone momask-codes (Joint2BVHConvertor)
+RUN git clone --depth=1 https://github.com/EricGuo5513/momask-codes.git /momask
+
+# Apply numpy 2.x compatibility patches (sweep all .py files)
+RUN sed -i 's/import numpy.core.umath_tests as ut/import numpy as np/g'  /momask/visualization/Animation.py && \
+    sed -i 's/ut\.matrix_multiply/np.matmul/g'                            /momask/visualization/Animation.py && \
+    find /momask -name "*.py" -exec sed -i 's/np\.float\b/float/g' {} +
+
+
+# CPU-only torch. momask Joint2BVHConvertor + the IK/Rig path work fine on 2.4.x.
+RUN pip install --no-cache-dir \
+    torch==2.4.1 --index-url https://download.pytorch.org/whl/cpu
+
+# Base app + IK dependencies
+RUN pip install --no-cache-dir \
+    fastapi==0.111.0 \
+    "uvicorn[standard]==0.29.0" \
+    numpy==1.26.4 \
+    scipy==1.13.0 \
+    matplotlib==3.8.4 \
+    tqdm==4.66.4 \
+    imageio==2.34.1 \
+    imageio-ffmpeg==0.5.1
+
+WORKDIR /app
+
+COPY app.py retargeter.py retarget_keemap.py mapping.json \
+     Y_bot.fbx Ch14_nonPBR.fbx Ch43_nonPBR.fbx ./
+
+ENV MOMASK_PATH=/momask
+ENV BLENDER_BIN=blender
+
+EXPOSE 8000
+
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]

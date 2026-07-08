@@ -1,0 +1,397 @@
+{
+  "last_node_id": 6,
+  "last_link_id": 8,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "AnimoFlow_DrawTrajectory",
+      "pos": [
+        80,
+        200
+      ],
+      "size": [
+        400,
+        96
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "curve_2d_json",
+          "type": "STRING",
+          "links": [],
+          "slot_index": 0
+        },
+        {
+          "name": "root2d_json",
+          "type": "STRING",
+          "links": [
+            2
+          ],
+          "slot_index": 1
+        },
+        {
+          "name": "traj_restore_json",
+          "type": "STRING",
+          "links": [
+            6
+          ],
+          "slot_index": 2
+        },
+        {
+          "name": "duration",
+          "type": "FLOAT",
+          "links": [
+            1
+          ],
+          "slot_index": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimoFlow_DrawTrajectory"
+      },
+      "widgets_values": [
+        "[[0.5, 0.5], [0.5, 1.5], [1.0, 2.2], [1.8, 2.6], [2.6, 2.6]]",
+        4.0
+      ]
+    },
+    {
+      "id": 2,
+      "type": "AnimoFlow_Kimodo",
+      "pos": [
+        510,
+        200
+      ],
+      "size": [
+        400,
+        376
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "duration",
+          "type": "FLOAT",
+          "link": 1,
+          "widget": {
+            "name": "duration"
+          }
+        },
+        {
+          "name": "root2d_json",
+          "type": "STRING",
+          "link": 2,
+          "widget": {
+            "name": "root2d_json"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "bvh_b64",
+          "type": "ANIMOFLOW_BVH",
+          "links": [
+            3
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "soma_raw_b64",
+          "type": "ANIMOFLOW_SOMA",
+          "links": [],
+          "slot_index": 1
+        },
+        {
+          "name": "npz_b64",
+          "type": "ANIMOFLOW_NPZ",
+          "links": [],
+          "slot_index": 2
+        },
+        {
+          "name": "native_fps",
+          "type": "INT",
+          "links": [],
+          "slot_index": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimoFlow_Kimodo"
+      },
+      "widgets_values": [
+        "a person walks forward",
+        5.0,
+        "Kimodo-SOMA-RP-v1",
+        "BVH (22-joint rig)",
+        100,
+        2.0,
+        2.0,
+        123,
+        "fixed",
+        ""
+      ]
+    },
+    {
+      "id": 3,
+      "type": "AnimoFlow_Rig",
+      "pos": [
+        940,
+        200
+      ],
+      "size": [
+        400,
+        152
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "bvh_b64",
+          "type": "ANIMOFLOW_BVH",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "fbx_filename",
+          "type": "STRING",
+          "links": [
+            4
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "character",
+          "type": "STRING",
+          "links": [
+            5
+          ],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimoFlow_Rig"
+      },
+      "widgets_values": [
+        "",
+        "",
+        "Y_bot"
+      ]
+    },
+    {
+      "id": 4,
+      "type": "AnimoFlow_GLBExport",
+      "pos": [
+        1370,
+        200
+      ],
+      "size": [
+        400,
+        404
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "fbx_filename",
+          "type": "STRING",
+          "link": 4,
+          "widget": {
+            "name": "fbx_filename"
+          }
+        },
+        {
+          "name": "character",
+          "type": "STRING",
+          "link": 5,
+          "widget": {
+            "name": "character"
+          }
+        },
+        {
+          "name": "traj_restore_json",
+          "type": "STRING",
+          "link": 6,
+          "widget": {
+            "name": "traj_restore_json"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "glb_filename",
+          "type": "STRING",
+          "links": [
+            7
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimoFlow_GLBExport"
+      },
+      "widgets_values": [
+        "",
+        true,
+        "",
+        false,
+        3.0,
+        true,
+        "",
+        "",
+        false,
+        false
+      ]
+    },
+    {
+      "id": 5,
+      "type": "AnimoFlow_FBXToPreview3D",
+      "pos": [
+        1800,
+        200
+      ],
+      "size": [
+        400,
+        124
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "fbx_filename",
+          "type": "STRING",
+          "link": 7,
+          "widget": {
+            "name": "fbx_filename"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "model_file",
+          "type": "STRING",
+          "links": [
+            8
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimoFlow_FBXToPreview3D"
+      },
+      "widgets_values": [
+        "",
+        ""
+      ]
+    },
+    {
+      "id": 6,
+      "type": "Preview3D",
+      "pos": [
+        2230,
+        200
+      ],
+      "size": [
+        400,
+        520
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model_file",
+          "type": "STRING",
+          "link": 8,
+          "widget": {
+            "name": "model_file"
+          }
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "Preview3D"
+      },
+      "widgets_values": [
+        ""
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      3,
+      2,
+      0,
+      "FLOAT"
+    ],
+    [
+      2,
+      1,
+      1,
+      2,
+      1,
+      "STRING"
+    ],
+    [
+      3,
+      2,
+      0,
+      3,
+      0,
+      "ANIMOFLOW_BVH"
+    ],
+    [
+      4,
+      3,
+      0,
+      4,
+      0,
+      "STRING"
+    ],
+    [
+      5,
+      3,
+      1,
+      4,
+      1,
+      "STRING"
+    ],
+    [
+      6,
+      1,
+      2,
+      4,
+      2,
+      "STRING"
+    ],
+    [
+      7,
+      4,
+      0,
+      5,
+      0,
+      "STRING"
+    ],
+    [
+      8,
+      5,
+      0,
+      6,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "generated_by": "scripts/gen_workflows.py"
+  },
+  "version": 0.4
+}

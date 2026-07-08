@@ -1,0 +1,31 @@
+# ComfyUI Registry metadata — makes this node pack discoverable/installable via
+# ComfyUI-Manager and publishable with `comfy node publish` (or the GitHub
+# Action in .github/workflows/publish-node.yml).
+#
+# Publishing is DORMANT until the repos go public: it needs the registry
+# publisher account ("animoflow") and a REGISTRY_ACCESS_TOKEN repo secret.
+
+[project]
+name = "comfyui-animoflow"
+description = "Text-to-motion animation pipeline for ComfyUI: SOTA motion models (MDM, priorMDM, MoMask, Kimodo) in isolated Docker containers, plus resampling, IK cleanup, character rigging, and GLB/FBX export nodes."
+version = "0.1.0"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "scipy",
+    "requests",
+    "Pillow",
+    "opencv-python-headless",
+    "sentence-transformers",
+]
+
+[project.urls]
+Repository = "https://github.com/AnimoFlow/comfyui-animoflow"
+Documentation = "https://animoflow-alpha.pages.dev/guide/comfyui"
+
+[tool.comfy]
+PublisherId = "animoflow"
+DisplayName = "AnimoFlow"
+Icon = "https://animoflow-alpha.pages.dev/favicon.svg"
+requires-comfyui = ">=0.3.0"

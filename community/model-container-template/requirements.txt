@@ -1,0 +1,9 @@
+# Contract layer — pinned to match the first-party containers.
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+numpy==1.26.4
+
+# torch is installed separately in the Dockerfile (CPU wheel index).
+# Append your model's own dependencies below:
+# einops==0.7.0
+# git+https://github.com/openai/CLIP.git

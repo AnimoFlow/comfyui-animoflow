@@ -1,0 +1,100 @@
+{
+  "1": {
+    "class_type": "AnimoFlow_DrawTrajectory",
+    "inputs": {
+      "points_json": "[[0.5, 0.5], [0.5, 1.5], [1.0, 2.2], [1.8, 2.6], [2.6, 2.6]]",
+      "duration": 6.0
+    }
+  },
+  "2": {
+    "class_type": "AnimoFlow_PriorMDM",
+    "inputs": {
+      "prompt": "a person walks forward",
+      "num_frames": 120,
+      "seed": 123,
+      "cfg": 7.5,
+      "sample_id": "000004",
+      "curve_2d_json": [
+        "1",
+        0
+      ],
+      "accel_frac": 0.25,
+      "decel_frac": 0.25
+    }
+  },
+  "3": {
+    "class_type": "AnimoFlow_Resample",
+    "inputs": {
+      "npz_b64": [
+        "2",
+        0
+      ],
+      "input_fps": 20,
+      "output_fps": 30
+    }
+  },
+  "4": {
+    "class_type": "AnimoFlow_IK",
+    "inputs": {
+      "npz_b64": [
+        "3",
+        0
+      ]
+    }
+  },
+  "5": {
+    "class_type": "AnimoFlow_Rig",
+    "inputs": {
+      "bvh_b64": [
+        "4",
+        0
+      ],
+      "output_dir": "",
+      "job_id": "",
+      "character": "Y_bot"
+    }
+  },
+  "6": {
+    "class_type": "AnimoFlow_GLBExport",
+    "inputs": {
+      "fbx_filename": [
+        "5",
+        0
+      ],
+      "enabled": true,
+      "output_dir": "",
+      "reduce_keyframes": false,
+      "error_degrees": 3.0,
+      "snap_to_ground": true,
+      "character": [
+        "5",
+        1
+      ],
+      "traj_restore_json": [
+        "1",
+        2
+      ],
+      "compress_output": false,
+      "downsize_textures": false
+    }
+  },
+  "7": {
+    "class_type": "AnimoFlow_FBXToPreview3D",
+    "inputs": {
+      "fbx_filename": [
+        "6",
+        0
+      ],
+      "output_dir": ""
+    }
+  },
+  "8": {
+    "class_type": "Preview3D",
+    "inputs": {
+      "model_file": [
+        "7",
+        0
+      ]
+    }
+  }
+}

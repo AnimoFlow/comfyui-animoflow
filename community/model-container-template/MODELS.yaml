@@ -1,0 +1,22 @@
+# AnimoFlow model container manifest (Model Container Spec).
+# Declares what this container is and what it accepts; the API gateway loads
+# it to populate the model catalog. Keep it in sync with app.py's
+# GenerateRequest and inference.py.
+
+name: yourmodel                 # ^[a-z0-9-]+$ — must match your registry entry
+version: 0.1.0                  # semver of YOUR wrapper (not the upstream repo)
+contract_version: 1             # HTTP contract implemented (community/CONTRACT.md)
+
+input_types: [text]             # what conditions generation: text | motion | audio | ...
+outputs: [joints_22]            # NPZ `poses` (T,22,3) float32 — contract §2.1
+
+native_fps: 20                  # your model's output frame rate (HumanML3D: 20)
+
+# One entry per generate parameter beyond `prompt`.
+# Mirrors app.py GenerateRequest; consumed by catalog/UI layers.
+params_schema:
+  num_frames:     {type: int,   min: 16,  max: 196,        default: 120}
+  seed:           {type: int,   min: 0,   max: 2147483647, default: 42}
+  guidance_param: {type: float, min: 0.0, max: 20.0,       default: 7.5}
+
+gpu_required: false             # true if CPU inference is impractically slow

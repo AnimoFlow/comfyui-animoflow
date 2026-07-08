@@ -1,0 +1,39 @@
+FROM python:3.11-slim
+
+RUN apt-get update && apt-get install -y git curl && rm -rf /var/lib/apt/lists/*
+
+# Clone MDM source (model architecture + recover_from_ric)
+RUN git clone --depth=1 https://github.com/GuyTevet/motion-diffusion-model.git /app/mdm
+
+# Clone momask-codes (Joint2BVHConvertor used in retargeter; shared utils)
+RUN git clone --depth=1 https://github.com/EricGuo5513/momask-codes.git /momask
+
+# Apply numpy 2.x compatibility patches (sweep all .py files)
+RUN sed -i 's/import numpy.core.umath_tests as ut/import numpy as np/g'  /momask/visualization/Animation.py && \
+    sed -i 's/ut\.matrix_multiply/np.matmul/g'                            /momask/visualization/Animation.py && \
+    find /momask -name "*.py" -exec sed -i 's/np\.float\b/float/g' {} +
+
+# CPU-only PyTorch (much smaller than CUDA build, ~260MB vs ~2GB)
+RUN pip install --no-cache-dir \
+    torch==2.2.2 --index-url https://download.pytorch.org/whl/cpu
+
+# App dependencies
+RUN pip install --no-cache-dir \
+    fastapi==0.111.0 \
+    "uvicorn[standard]==0.29.0" \
+    numpy==1.26.4 \
+    scipy==1.13.0 \
+    einops==0.7.0 \
+    "git+https://github.com/openai/CLIP.git"
+
+WORKDIR /app
+
+COPY app.py inference.py ./
+COPY weights/ ./weights/
+
+ENV MDM_PATH=/app/mdm
+ENV WEIGHTS_DIR=/app/weights
+
+EXPOSE 8000
+
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]

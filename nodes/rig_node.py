@@ -1,0 +1,106 @@
+"""
+AnimoFlow Retargeting & Rigging Node
+Converts BVH to FBX via Blender + character rig.
+Runs directly in the ComfyUI venv (no HTTP, no container).
+"""
+import base64
+import os
+import time
+
+# Use realpath() so dirname navigation works through ComfyUI's symlink
+_REPO_DIR      = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+CHARACTERS_DIR = os.environ.get("CHARACTERS_DIR", os.path.join(_REPO_DIR, "characters"))
+DEFAULT_OUTPUT_DIR = os.environ.get("ANIMOFLOW_OUTPUT_DIR", "/tmp/animoflow-output")
+
+# Lazy-loaded singleton
+_retargeter = None
+
+
+def _get_retargeter():
+    global _retargeter
+    if _retargeter is None:
+        import os, sys, importlib.util
+        _nodes_dir = os.path.dirname(os.path.realpath(__file__))
+        _pkg_init  = os.path.join(_nodes_dir, "retargeter", "__init__.py")
+        spec = importlib.util.spec_from_file_location("animoflow_retargeter", _pkg_init)
+        mod  = importlib.util.module_from_spec(spec)
+        sys.modules.setdefault("animoflow_retargeter", mod)
+        spec.loader.exec_module(mod)
+        _retargeter = mod.MotionRetargeter()
+    return _retargeter
+
+
+def _list_characters():
+    """Return {display_name: absolute_path} for all FBX files in characters/."""
+    chars = {}
+    if os.path.isdir(CHARACTERS_DIR):
+        for f in sorted(os.listdir(CHARACTERS_DIR)):
+            if f.lower().endswith(".fbx"):
+                name = os.path.splitext(f)[0]
+                chars[name] = os.path.join(CHARACTERS_DIR, f)
+    if not chars:
+        chars["Y_bot"] = os.path.join(CHARACTERS_DIR, "Y_bot.fbx")
+    return chars
+
+
+class AnimoFlowRigNode:
+    CATEGORY = "AnimoFlow/Motion"
+    # character is re-emitted so downstream nodes (AnimoFlow_GLBExport's
+    # brand/snap policy) are WIRED to the one selection made here — a GUI
+    # user changing the rig character can't leave the export node tinting
+    # the wrong character (the everyone-painted-yellow bug, 2026-07-03).
+    RETURN_TYPES = ("STRING", "STRING")
+    RETURN_NAMES = ("fbx_filename", "character")
+    OUTPUT_NODE = True
+    FUNCTION = "retarget_and_rig"
+
+    @classmethod
+    def IS_CHANGED(cls, **kwargs):
+        """Always re-execute — never cache."""
+        import time
+        return time.time()
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        character_names = list(_list_characters().keys())
+        return {
+            "required": {
+                "bvh_b64":    ("ANIMOFLOW_BVH",),
+                "output_dir": ("STRING",        {"default": DEFAULT_OUTPUT_DIR}),
+                "job_id":     ("STRING",        {"default": ""}),
+                "character":  (character_names, {}),
+            },
+            "optional": {},
+        }
+
+    def retarget_and_rig(self, bvh_b64: str, output_dir: str, job_id: str, character: str):
+        retargeter = _get_retargeter()
+        bvh_bytes = base64.b64decode(bvh_b64)
+
+        fbx_template = _list_characters().get(character)
+        if not fbx_template or not os.path.exists(fbx_template):
+            raise RuntimeError(f"Character FBX not found: {character} → {fbx_template}")
+
+        fbx_bytes, _ = retargeter.bvh_to_fbx(bvh_bytes, fbx_template=fbx_template)
+
+        # Empty output_dir → server-side default. Lets shipped workflows
+        # stay machine-portable instead of baking an absolute path.
+        output_dir = (output_dir
+                      or os.environ.get("ANIMOFLOW_OUTPUT_DIR")
+                      or "/tmp/animoflow-output")
+        os.makedirs(output_dir, exist_ok=True)
+        filename = f"{job_id}.fbx" if job_id else f"animoflow_{int(time.time())}.fbx"
+        filepath = os.path.join(output_dir, filename)
+
+        with open(filepath, "wb") as f:
+            f.write(fbx_bytes)
+
+        size_kb = os.path.getsize(filepath) // 1024
+        print(f"[AnimoFlowRigNode] Saved FBX → {filepath} ({size_kb} KB)")
+
+        return {
+            "ui": {
+                "images": [{"filename": filename, "subfolder": "", "type": "output"}],
+            },
+            "result": (filename, character),
+        }

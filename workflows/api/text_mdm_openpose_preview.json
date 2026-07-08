@@ -1,0 +1,104 @@
+{
+  "1": {
+    "class_type": "AnimoFlow_PromptRewrite",
+    "inputs": {
+      "prompt": "a person walks forward",
+      "mode": "auto"
+    }
+  },
+  "2": {
+    "class_type": "AnimoFlow_MDM",
+    "inputs": {
+      "prompt": [
+        "1",
+        0
+      ],
+      "num_frames": 101,
+      "cfg": 7.5,
+      "seed": 123
+    }
+  },
+  "3": {
+    "class_type": "AnimoFlow_Resample",
+    "inputs": {
+      "npz_b64": [
+        "2",
+        0
+      ],
+      "input_fps": 20,
+      "output_fps": 16
+    }
+  },
+  "4": {
+    "class_type": "AnimoFlow_SmplToOpenPose3D",
+    "inputs": {
+      "npz_b64": [
+        "3",
+        0
+      ],
+      "face_scale": 1.0
+    }
+  },
+  "5": {
+    "class_type": "AnimoFlow_Camera",
+    "inputs": {
+      "pose3d_b64": [
+        "4",
+        0
+      ],
+      "mode": "track",
+      "azimuth": 30.0,
+      "elevation": 10.0,
+      "distance": 0.0,
+      "fov": 40.0,
+      "width": 832,
+      "height": 480,
+      "smoothing": 5.0,
+      "margin": 0.15
+    }
+  },
+  "6": {
+    "class_type": "AnimoFlow_OpenPoseRender",
+    "inputs": {
+      "pose3d_b64": [
+        "4",
+        0
+      ],
+      "camera_b64": [
+        "5",
+        0
+      ],
+      "occlude_face": true,
+      "max_frames": 81
+    }
+  },
+  "7": {
+    "class_type": "SaveAnimatedWEBP",
+    "inputs": {
+      "images": [
+        "6",
+        0
+      ],
+      "filename_prefix": "animoflow_openpose",
+      "fps": 16.0,
+      "lossless": false,
+      "quality": 80,
+      "method": "default"
+    }
+  },
+  "8": {
+    "class_type": "AnimoFlow_PreviewMotion",
+    "inputs": {
+      "npz_b64": [
+        "3",
+        0
+      ],
+      "motion_fps": 16,
+      "frame_skip": 2,
+      "size": 384,
+      "elevation": 15.0,
+      "azimuth": -60.0,
+      "show_trace": true
+    }
+  }
+}

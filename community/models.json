@@ -1,0 +1,17 @@
+{
+  "$schema": "./models.schema.json",
+  "disclaimer": "Listing is not endorsement. Each entry is an independent, community-maintained container: it carries its own license, its code never enters AnimoFlow's repositories, and AnimoFlow only validates that the entry below is well-formed. Run third-party images at your own discretion.",
+  "models": [
+    {
+      "name": "example-yourmodel",
+      "description": "EXAMPLE ENTRY — copy, rename (drop the 'example-' prefix), and fill in. Text-to-motion model wrapped with the community/model-container-template.",
+      "repo_url": "https://github.com/you/yourmodel-animoflow-container",
+      "image": "ghcr.io/you/yourmodel-animoflow:0.1.0",
+      "license": "MIT",
+      "maintainer": "Your Name <you@example.com>",
+      "contract_version": 1,
+      "gpu_required": false,
+      "paper_url": "https://arxiv.org/abs/0000.00000"
+    }
+  ]
+}

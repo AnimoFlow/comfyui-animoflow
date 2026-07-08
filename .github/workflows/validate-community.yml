@@ -1,0 +1,132 @@
+# Validate community model-registry PRs (community/models.json).
+#
+# Two jobs:
+#   schema   (BLOCKING)  — models.json must parse and satisfy models.schema.json
+#   liveness (ADVISORY)  — each repo_url should answer over HTTPS; failures
+#                          only warn (a flaky host must not block a merge)
+#
+# Registry PRs contain one JSON entry and no code, so passing `schema` is the
+# entire acceptance bar — see community/README.md ("no code review, no CLA").
+
+name: Validate community registry
+
+on:
+  pull_request:
+    paths:
+      - "community/models.json"
+      - "community/models.schema.json"
+
+permissions:
+  contents: read
+
+jobs:
+  schema:
+    name: Schema validation (blocking)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install jsonschema
+        run: pip install "jsonschema>=4.21"
+
+      - name: Validate models.json against models.schema.json
+        run: |
+          python - <<'EOF'
+          import json, sys
+          from jsonschema import Draft202012Validator
+
+          data   = json.load(open("community/models.json"))
+          schema = json.load(open("community/models.schema.json"))
+
+          errors = sorted(
+              Draft202012Validator(schema).iter_errors(data),
+              key=lambda e: list(e.absolute_path),
+          )
+          for e in errors:
+              path = "$" + "".join(f"[{p!r}]" for p in e.absolute_path)
+              print(f"::error file=community/models.json::{path}: {e.message}")
+          if errors:
+              sys.exit(1)
+
+          # Registry-level invariant the schema can't express: unique names.
+          names = [m["name"] for m in data["models"]]
+          dupes = {n for n in names if names.count(n) > 1}
+          if dupes:
+              print(f"::error file=community/models.json::duplicate model names: {sorted(dupes)}")
+              sys.exit(1)
+
+          print(f"OK: {len(names)} entr{'y' if len(names) == 1 else 'ies'} valid.")
+          EOF
+
+  liveness:
+    name: repo_url liveness (advisory)
+    runs-on: ubuntu-latest
+    # Non-blocking by design: a temporarily-down host should not block a
+    # schema-valid registry PR. The job still surfaces warnings in the UI.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: HEAD-check every repo_url
+        run: |
+          set -uo pipefail
+          fails=0
+          for url in $(python3 -c '
+          import json
+          for m in json.load(open("community/models.json"))["models"]:
+              print(m["repo_url"])
+          '); do
+            if curl -sI --max-time 15 -o /dev/null -f -L "$url"; then
+              echo "OK   $url"
+            else
+              echo "::warning::repo_url not reachable right now: $url"
+              fails=$((fails + 1))
+            fi
+          done
+          # Exit non-zero so the (continue-on-error) job shows as neutral/red
+          # without failing the PR check suite.
+          exit "$fails"
+
+  # ── Auto-merge (DORMANT until the public flip) ─────────────────────────────
+  # Once the repo is public, schema-valid registry-only PRs can merge without
+  # a human in the loop. Enabling this needs repo setup first:
+  #   * branch protection on `main` requiring the "Schema validation
+  #     (blocking)" check (and only that one for community/models.json paths),
+  #   * "Allow auto-merge" enabled in repo settings,
+  #   * a CODEOWNERS rule scoping community/models.json away from the default
+  #     owners (so registry PRs don't wait on a code-owner review), e.g.:
+  #         *                       @AnimoFlow/core
+  #         /community/models.json  # no owner -> no required review
+  #   * a guard that the PR touches ONLY community/models.json (the `paths`
+  #     trigger alone does not guarantee that).
+  #
+  # automerge:
+  #   name: Enable auto-merge for registry-only PRs
+  #   runs-on: ubuntu-latest
+  #   needs: [schema]
+  #   permissions:
+  #     contents: write
+  #     pull-requests: write
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Verify the PR touches only community/models.json
+  #       id: registry_only
+  #       env:
+  #         GH_TOKEN: ${{ github.token }}
+  #       run: |
+  #         files=$(gh pr view "${{ github.event.pull_request.number }}" \
+  #                   --repo "${{ github.repository }}" --json files -q '.files[].path')
+  #         if [ "$files" = "community/models.json" ]; then
+  #           echo "registry_only=true" >> "$GITHUB_OUTPUT"
+  #         fi
+  #     - name: Enable auto-merge
+  #       if: steps.registry_only.outputs.registry_only == 'true'
+  #       env:
+  #         GH_TOKEN: ${{ github.token }}
+  #       run: |
+  #         gh pr merge "${{ github.event.pull_request.number }}" \
+  #           --repo "${{ github.repository }}" --auto --squash

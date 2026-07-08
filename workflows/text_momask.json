@@ -1,0 +1,369 @@
+{
+  "last_node_id": 7,
+  "last_link_id": 7,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "AnimoFlow_MoMask",
+      "pos": [
+        80,
+        200
+      ],
+      "size": [
+        400,
+        236
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "npz_b64",
+          "type": "ANIMOFLOW_NPZ",
+          "links": [
+            1
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "native_fps",
+          "type": "INT",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimoFlow_MoMask"
+      },
+      "widgets_values": [
+        "a person walks forward",
+        120,
+        5.0,
+        123,
+        "fixed",
+        10,
+        1.0
+      ]
+    },
+    {
+      "id": 2,
+      "type": "AnimoFlow_Resample",
+      "pos": [
+        510,
+        200
+      ],
+      "size": [
+        400,
+        124
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "npz_b64",
+          "type": "ANIMOFLOW_NPZ",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "npz_b64",
+          "type": "ANIMOFLOW_NPZ",
+          "links": [
+            2
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimoFlow_Resample"
+      },
+      "widgets_values": [
+        20,
+        30
+      ]
+    },
+    {
+      "id": 3,
+      "type": "AnimoFlow_IK",
+      "pos": [
+        940,
+        200
+      ],
+      "size": [
+        400,
+        96
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "npz_b64",
+          "type": "ANIMOFLOW_NPZ",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "bvh_b64",
+          "type": "ANIMOFLOW_BVH",
+          "links": [
+            3
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimoFlow_IK"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 4,
+      "type": "AnimoFlow_Rig",
+      "pos": [
+        1370,
+        200
+      ],
+      "size": [
+        400,
+        152
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "bvh_b64",
+          "type": "ANIMOFLOW_BVH",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "fbx_filename",
+          "type": "STRING",
+          "links": [
+            4
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "character",
+          "type": "STRING",
+          "links": [
+            5
+          ],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimoFlow_Rig"
+      },
+      "widgets_values": [
+        "",
+        "",
+        "Y_bot"
+      ]
+    },
+    {
+      "id": 5,
+      "type": "AnimoFlow_GLBExport",
+      "pos": [
+        1800,
+        200
+      ],
+      "size": [
+        400,
+        376
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "fbx_filename",
+          "type": "STRING",
+          "link": 4,
+          "widget": {
+            "name": "fbx_filename"
+          }
+        },
+        {
+          "name": "character",
+          "type": "STRING",
+          "link": 5,
+          "widget": {
+            "name": "character"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "glb_filename",
+          "type": "STRING",
+          "links": [
+            6
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimoFlow_GLBExport"
+      },
+      "widgets_values": [
+        "",
+        true,
+        "",
+        false,
+        3.0,
+        true,
+        "",
+        "",
+        false,
+        false
+      ]
+    },
+    {
+      "id": 6,
+      "type": "AnimoFlow_FBXToPreview3D",
+      "pos": [
+        2230,
+        200
+      ],
+      "size": [
+        400,
+        124
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "fbx_filename",
+          "type": "STRING",
+          "link": 6,
+          "widget": {
+            "name": "fbx_filename"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "model_file",
+          "type": "STRING",
+          "links": [
+            7
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimoFlow_FBXToPreview3D"
+      },
+      "widgets_values": [
+        "",
+        ""
+      ]
+    },
+    {
+      "id": 7,
+      "type": "Preview3D",
+      "pos": [
+        2660,
+        200
+      ],
+      "size": [
+        400,
+        520
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model_file",
+          "type": "STRING",
+          "link": 7,
+          "widget": {
+            "name": "model_file"
+          }
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "Preview3D"
+      },
+      "widgets_values": [
+        ""
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      2,
+      0,
+      "ANIMOFLOW_NPZ"
+    ],
+    [
+      2,
+      2,
+      0,
+      3,
+      0,
+      "ANIMOFLOW_NPZ"
+    ],
+    [
+      3,
+      3,
+      0,
+      4,
+      0,
+      "ANIMOFLOW_BVH"
+    ],
+    [
+      4,
+      4,
+      0,
+      5,
+      0,
+      "STRING"
+    ],
+    [
+      5,
+      4,
+      1,
+      5,
+      1,
+      "STRING"
+    ],
+    [
+      6,
+      5,
+      0,
+      6,
+      0,
+      "STRING"
+    ],
+    [
+      7,
+      6,
+      0,
+      7,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "generated_by": "scripts/gen_workflows.py"
+  },
+  "version": 0.4
+}

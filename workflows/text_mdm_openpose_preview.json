@@ -1,0 +1,426 @@
+{
+  "id": "d1493b0a-2d4c-4319-9cbf-7e6bd9dc3179",
+  "revision": 0,
+  "last_node_id": 8,
+  "last_link_id": 8,
+  "nodes": [
+    {
+      "id": 5,
+      "type": "AnimoFlow_Camera",
+      "pos": [
+        1800,
+        200
+      ],
+      "size": [
+        400,
+        320
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "pose3d_b64",
+          "type": "ANIMOFLOW_POSE3D",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "camera_b64",
+          "type": "ANIMOFLOW_CAMERA",
+          "slot_index": 0,
+          "links": [
+            6
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimoFlow_Camera"
+      },
+      "widgets_values": [
+        "track",
+        30,
+        10,
+        0,
+        40,
+        832,
+        480,
+        5,
+        0.15
+      ]
+    },
+    {
+      "id": 8,
+      "type": "AnimoFlow_PreviewMotion",
+      "pos": [
+        1339.3715895272262,
+        389.88519454018507
+      ],
+      "size": [
+        433.2573292364377,
+        481.4581004192553
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "npz_b64",
+          "type": "ANIMOFLOW_NPZ",
+          "link": 8
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "AnimoFlow_PreviewMotion"
+      },
+      "widgets_values": [
+        16,
+        2,
+        384,
+        15,
+        -60,
+        true
+      ]
+    },
+    {
+      "id": 6,
+      "type": "AnimoFlow_OpenPoseRender",
+      "pos": [
+        2267.741732454272,
+        -68.98652176454422
+      ],
+      "size": [
+        400,
+        152
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "pose3d_b64",
+          "type": "ANIMOFLOW_POSE3D",
+          "link": 5
+        },
+        {
+          "name": "camera_b64",
+          "type": "ANIMOFLOW_CAMERA",
+          "link": 6
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "slot_index": 0,
+          "links": [
+            7
+          ]
+        },
+        {
+          "name": "fps",
+          "type": "INT",
+          "slot_index": 1,
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimoFlow_OpenPoseRender"
+      },
+      "widgets_values": [
+        true,
+        81
+      ]
+    },
+    {
+      "id": 7,
+      "type": "SaveAnimatedWEBP",
+      "pos": [
+        2739.965766467484,
+        -70.89136540423772
+      ],
+      "size": [
+        411.24231255406676,
+        397.1767564772242
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveAnimatedWEBP"
+      },
+      "widgets_values": [
+        "animoflow_openpose",
+        16,
+        false,
+        80,
+        "default"
+      ]
+    },
+    {
+      "id": 4,
+      "type": "AnimoFlow_SmplToOpenPose3D",
+      "pos": [
+        1362.7756937787387,
+        -0.9491589811774159
+      ],
+      "size": [
+        400,
+        96
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "npz_b64",
+          "type": "ANIMOFLOW_NPZ",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "pose3d_b64",
+          "type": "ANIMOFLOW_POSE3D",
+          "slot_index": 0,
+          "links": [
+            4,
+            5
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimoFlow_SmplToOpenPose3D"
+      },
+      "widgets_values": [
+        1
+      ]
+    },
+    {
+      "id": 3,
+      "type": "AnimoFlow_Resample",
+      "pos": [
+        881.0775357262344,
+        129.45791203893722
+      ],
+      "size": [
+        400,
+        124
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "npz_b64",
+          "type": "ANIMOFLOW_NPZ",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "npz_b64",
+          "type": "ANIMOFLOW_NPZ",
+          "slot_index": 0,
+          "links": [
+            3,
+            8
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimoFlow_Resample"
+      },
+      "widgets_values": [
+        20,
+        16
+      ]
+    },
+    {
+      "id": 2,
+      "type": "AnimoFlow_MDM",
+      "pos": [
+        423.4895238651227,
+        -128.9698526513123
+      ],
+      "size": [
+        400,
+        208
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "widget": {
+            "name": "prompt"
+          },
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "npz_b64",
+          "type": "ANIMOFLOW_NPZ",
+          "slot_index": 0,
+          "links": [
+            2
+          ]
+        },
+        {
+          "name": "native_fps",
+          "type": "INT",
+          "slot_index": 1,
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimoFlow_MDM"
+      },
+      "widgets_values": [
+        "a person walks forward",
+        101,
+        7.5,
+        123,
+        "fixed"
+      ]
+    },
+    {
+      "id": 1,
+      "type": "AnimoFlow_PromptRewrite",
+      "pos": [
+        -36.13249510101276,
+        136.29690282974047
+      ],
+      "size": [
+        400,
+        132
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "rewritten_prompt",
+          "type": "STRING",
+          "slot_index": 0,
+          "links": [
+            1
+          ]
+        },
+        {
+          "name": "rewrite_info",
+          "type": "STRING",
+          "slot_index": 1,
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AnimoFlow_PromptRewrite"
+      },
+      "widgets_values": [
+        "a person walks forward",
+        "auto"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      2,
+      0,
+      "STRING"
+    ],
+    [
+      2,
+      2,
+      0,
+      3,
+      0,
+      "ANIMOFLOW_NPZ"
+    ],
+    [
+      3,
+      3,
+      0,
+      4,
+      0,
+      "ANIMOFLOW_NPZ"
+    ],
+    [
+      4,
+      4,
+      0,
+      5,
+      0,
+      "ANIMOFLOW_POSE3D"
+    ],
+    [
+      5,
+      4,
+      0,
+      6,
+      0,
+      "ANIMOFLOW_POSE3D"
+    ],
+    [
+      6,
+      5,
+      0,
+      6,
+      1,
+      "ANIMOFLOW_CAMERA"
+    ],
+    [
+      7,
+      6,
+      0,
+      7,
+      0,
+      "IMAGE"
+    ],
+    [
+      8,
+      3,
+      0,
+      8,
+      0,
+      "ANIMOFLOW_NPZ"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "generated_by": "scripts/gen_workflows.py",
+    "ds": {
+      "scale": 0.49583048396501556,
+      "offset": [
+        108.43573236942919,
+        1397.5126591127716
+      ]
+    },
+    "frontendVersion": "1.45.20"
+  },
+  "version": 0.4
+}

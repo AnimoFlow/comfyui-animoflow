@@ -1,0 +1,38 @@
+# AnimoFlow dev overlay — bind-mount wrapper source + uvicorn --reload for fast inner-loop dev.
+#
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# What this changes:
+#   - Bind-mounts containers/<model>/app.py and inference*.py into each container's WORKDIR (/app).
+#     Editing those files on the host triggers uvicorn --reload inside the container; no image rebuild.
+#   - Does NOT bind-mount the upstream cloned model source (e.g. ~/momask-codes) — that's expected to be
+#     mounted via the model-specific bind in docker-compose.yml proper. This overlay only covers the
+#     wrapper layer (FastAPI app + inference glue), which is the usual edit hotspot.
+#
+# What this does NOT do:
+#   - Does NOT auto-load (the file is named .dev.yml, not .override.yml). Pass it explicitly via -f.
+#   - Does NOT change the model containers' deps, image, or build context. Rebuild is still required when
+#     pinned upstream SHA changes or when Dockerfile changes.
+#   - Does NOT apply to characters_init or kimodo (those rarely change in dev).
+
+services:
+  mdm:
+    volumes:
+      - ./containers/mdm/app.py:/app/app.py:ro
+      - ./containers/mdm/inference.py:/app/inference.py:ro
+    command: ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  momask:
+    volumes:
+      - ./containers/momask/app.py:/app/app.py:ro
+      - ./containers/momask/inference.py:/app/inference.py:ro
+      - ./containers/momask/inference_momask.py:/app/inference_momask.py:ro
+    command: ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  priormdm:
+    volumes:
+      - ./containers/priormdm/app.py:/app/app.py:ro
+      - ./containers/priormdm/inference.py:/app/inference.py:ro
+    command: ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
