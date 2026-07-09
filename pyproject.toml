@@ -27,5 +27,5 @@ Documentation = "https://animoflow-alpha.pages.dev/guide/comfyui"
 [tool.comfy]
 PublisherId = "animoflow"
 DisplayName = "AnimoFlow"
-Icon = "https://animoflow-alpha.pages.dev/favicon.svg"
+Icon = "https://animoflow.ai/favicon.svg"
 requires-comfyui = ">=0.3.0"
