@@ -30,6 +30,27 @@ def _get_retargeter():
     return _retargeter
 
 
+def _robot_characters():
+    """Robot character names whose GLB template is installed. Missing
+    dependencies remove robots from the roster but never silently: the
+    warning names the problem, and ANIMOFLOW_REQUIRE_ROBOTS=1 turns it into
+    a hard failure for deployments that ship robots."""
+    import sys
+
+    if _REPO_DIR not in sys.path:
+        sys.path.insert(0, _REPO_DIR)
+    try:
+        from robot_retarget.characters import robot_roster
+
+        return robot_roster(CHARACTERS_DIR)
+    except ImportError as exc:
+        msg = f"[AnimoFlowRigNode] robot characters unavailable: {exc}"
+        if os.environ.get("ANIMOFLOW_REQUIRE_ROBOTS") == "1":
+            raise RuntimeError(msg) from exc
+        print(msg)
+        return []
+
+
 def _list_characters():
     """Return {display_name: absolute_path} for all FBX files in characters/."""
     chars = {}
@@ -62,7 +83,7 @@ class AnimoFlowRigNode:
 
     @classmethod
     def INPUT_TYPES(cls):
-        character_names = list(_list_characters().keys())
+        character_names = list(_list_characters().keys()) + _robot_characters()
         return {
             "required": {
                 "bvh_b64":    ("ANIMOFLOW_BVH",),
@@ -74,15 +95,23 @@ class AnimoFlowRigNode:
         }
 
     def retarget_and_rig(self, bvh_b64: str, output_dir: str, job_id: str, character: str):
-        retargeter = _get_retargeter()
         bvh_bytes = base64.b64decode(bvh_b64)
 
+        if character in _robot_characters():
+            from robot_retarget.characters import retarget_to_robot_fbx
+
+            fbx_bytes = retarget_to_robot_fbx(bvh_bytes, character, CHARACTERS_DIR)
+            return self._save(fbx_bytes, output_dir, job_id, character)
+
+        retargeter = _get_retargeter()
         fbx_template = _list_characters().get(character)
         if not fbx_template or not os.path.exists(fbx_template):
             raise RuntimeError(f"Character FBX not found: {character} → {fbx_template}")
 
         fbx_bytes, _ = retargeter.bvh_to_fbx(bvh_bytes, fbx_template=fbx_template)
+        return self._save(fbx_bytes, output_dir, job_id, character)
 
+    def _save(self, fbx_bytes: bytes, output_dir: str, job_id: str, character: str):
         # Empty output_dir → server-side default. Lets shipped workflows
         # stay machine-portable instead of baking an absolute path.
         output_dir = (output_dir

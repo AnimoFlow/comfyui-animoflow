@@ -18,6 +18,10 @@ containers/retargeter/Ch43_nonPBR.fbx
 # manually from mixamo.com (see characters/README.md). The bone_map.json
 # sidecars ARE tracked (plain JSON, no Mixamo content).
 characters/*.fbx
+# Robot character templates (rigged GLBs) are runtime-installed assets,
+# never tracked; the Unitree license notice ships alongside them.
+characters/*.glb
+characters/UNITREE_LICENSE.txt
 
 
 # Debug output artifacts

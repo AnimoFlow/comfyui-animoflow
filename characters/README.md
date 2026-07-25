@@ -117,3 +117,9 @@ the two characters automatically. Alternatively, download manually:
 
 - Mixamo characters may be used in commercial projects per Adobe's terms.
   They **cannot** be redistributed in source form (do not commit them to a public repo).
+- Robot characters (Unitree G1, Unitree H1) are rigged GLB templates built
+  from Unitree's robot description files, which are BSD-3-Clause licensed
+  (see `UNITREE_LICENSE.txt` installed next to the templates). Robot
+  retargeting additionally requires the dependencies listed in
+  `robot_retarget/requirements.txt` and a pinned GMR checkout (`GMR_HOME`);
+  see `robot_retarget/README.md`.

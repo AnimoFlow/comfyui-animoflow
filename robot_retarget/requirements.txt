@@ -1,0 +1,9 @@
+# Runtime dependencies for robot character retargeting (see README.md).
+# GMR itself is consumed from a pinned git checkout via GMR_HOME - install
+# with --no-deps semantics by installing this file, never GMR's setup.py.
+mink
+mujoco
+qpsolvers[daqp]
+scipy
+numpy
+rich

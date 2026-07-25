@@ -11,9 +11,7 @@ All failures raise RobotRetargetError or BVHFormatError. There is no
 fallback output of any kind.
 """
 
-from .bvh22 import BVHFormatError, load_bvh22, parse_bvh
 from .gmr_runtime import SUPPORTED_ROBOTS, RobotRetargetError, load_gmr
-from .retarget import RobotMotion, retarget_bvh22
 
 __all__ = [
     "BVHFormatError",
@@ -25,3 +23,23 @@ __all__ = [
     "parse_bvh",
     "retarget_bvh22",
 ]
+
+_LAZY = {
+    "BVHFormatError": "bvh22",
+    "load_bvh22": "bvh22",
+    "parse_bvh": "bvh22",
+    "RobotMotion": "retarget",
+    "retarget_bvh22": "retarget",
+}
+
+
+def __getattr__(name):
+    # PEP 562 lazy loading: the roster/registry side (characters.py,
+    # gmr_runtime) stays importable in dependency-light environments such
+    # as the API service; numpy/scipy load only when solving is requested.
+    if name in _LAZY:
+        import importlib
+
+        mod = importlib.import_module(f".{_LAZY[name]}", __name__)
+        return getattr(mod, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
