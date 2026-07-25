@@ -42,6 +42,25 @@ def parse_args():
     return ap.parse_args(argv)
 
 
+
+
+def _strip_phantom_meshes(tag):
+    """Remove importer-created junk meshes (e.g. the documented phantom
+    Icosphere): any mesh with no vertex groups that is not rigidly
+    bone-parented is display junk, never real character geometry."""
+    removed = []
+    for ob in list(bpy.data.objects):
+        if ob.type != "MESH":
+            continue
+        if ob.vertex_groups and len(ob.vertex_groups) > 0:
+            continue
+        if ob.parent_type == "BONE":
+            continue
+        removed.append(ob.name)
+        bpy.data.objects.remove(ob, do_unlink=True)
+    if removed:
+        print(f"[{tag}] stripped phantom mesh(es): {removed}")
+
 def find_armature():
     arms = [o for o in bpy.data.objects if o.type == "ARMATURE"]
     if len(arms) != 1:
@@ -66,6 +85,7 @@ def main():
 
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.ops.import_scene.gltf(filepath=args.template)
+    _strip_phantom_meshes("bake")
     arm_obj = find_armature()
 
     joint_to_bone = {}

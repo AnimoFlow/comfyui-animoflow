@@ -129,6 +129,25 @@ class AnimoFlowGLBExportNode:
         glb_filename = f"{stem}.glb"
         glb_path = os.path.join(os.path.dirname(fbx_path), glb_filename)
 
+        # Robot characters arrive precisely grounded from the retarget stage
+        # (sole geometry derived from the robot model). The vertex-percentile
+        # snap heuristic is tuned for skinned humanoid rest poses and shifts
+        # rigid robots wrongly — skip it for them.
+        robot_skip_reason = None
+        if snap_to_ground and character:
+            import sys as _sys
+
+            if _COMFYUI_ANIMOFLOW_ROOT not in _sys.path:
+                _sys.path.insert(0, _COMFYUI_ANIMOFLOW_ROOT)
+            try:
+                from robot_retarget.characters import is_robot_character
+
+                if is_robot_character(character):
+                    snap_to_ground = False
+                    robot_skip_reason = "robot character: grounded at retarget"
+            except ImportError:
+                pass
+
         traj = {}
         if traj_restore_json.strip():
             traj = json.loads(traj_restore_json)
@@ -171,7 +190,10 @@ class AnimoFlowGLBExportNode:
         # JobResponse.snap_info).
         snap_info = result.get("snap_info")
         if snap_info is None and not snap_to_ground:
-            snap_info = {"applied": False, "reason": "request snap_to_ground=false"}
+            snap_info = {
+                "applied": False,
+                "reason": robot_skip_reason or "request snap_to_ground=false",
+            }
         if snap_info is not None:
             try:
                 with open(os.path.join(os.path.dirname(fbx_path), f"{stem}.snap.json"), "w") as f:

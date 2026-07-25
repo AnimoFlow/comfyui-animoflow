@@ -77,7 +77,10 @@ try:
                 continue
             if _o.vertex_groups and len(_o.vertex_groups) > 0:
                 continue
-            if _o.parent and _o.parent.type == "ARMATURE":
+            # Rigid bone-parenting is a legitimate technique; a groupless
+            # mesh merely OBJECT-parented to the armature is importer junk
+            # (the robot-path phantom Icosphere arrives that way).
+            if _o.parent_type == "BONE":
                 continue
             _phantoms.append(_o.name)
             bpy.data.objects.remove(_o, do_unlink=True)
