@@ -19,6 +19,14 @@ Gate (calibrated 2026-07-26 on 98 labeled clips):
   The horizontal travel ratio is computed for telemetry only — it never
   gates (measured: no threshold catches anything the two rules miss).
 
+Before the rollout the reference is grounded: a constant vertical shift
+places its typical (5th-percentile) lowest collision point on the floor.
+Generated motion sometimes floats or sinks as a whole; physics can only act
+on the real floor, so without this the robot would track the pose correctly
+while the height gate measured the constant float as divergence and falsely
+rejected the result. Partial floats (a segment sitting on furniture that
+isn't there) survive the constant shift and still fail — correctly.
+
 The rollout follows NVIDIA's published deployment contract
 (ProtoMotions deployment/test_tracker_mujoco.py + state_utils.py) with no
 ProtoMotions imports: raw MuJoCo + ONNX Runtime + NumPy. 50 Hz policy,
@@ -299,9 +307,15 @@ def track_motion(root_pos, root_quat_wxyz, dof_pos, fps, robot) -> TrackingResul
     i0 = np.clip(np.floor(tt).astype(int), 0, T_src - 2)
     fr = np.clip(tt - i0, 0.0, 1.0)
 
+    # Joint velocities are differentiated at the SOURCE rate and then
+    # interpolated (differentiating the already-lerped 50 Hz signal gives a
+    # staircase derivative that measurably degrades tracking).
+    src_dof_vel = np.gradient(dof_pos, 1.0 / fps, axis=0)
+
     ref_root_pos = np.zeros((n50, 3))
     ref_root_quat = np.zeros((n50, 4))            # wxyz
     ref_dof = np.zeros((n50, ndof))
+    ref_dof_vel = np.zeros((n50, ndof))
     for i in range(n50):
         a, b, f = i0[i], i0[i] + 1, fr[i]
         ref_root_pos[i] = (1 - f) * root_pos[a] + f * root_pos[b]
@@ -310,18 +324,51 @@ def track_motion(root_pos, root_quat_wxyz, dof_pos, fps, robot) -> TrackingResul
         q = _slerp(qa, qb, f)
         ref_root_quat[i] = q[[3, 0, 1, 2]]
         ref_dof[i] = (1 - f) * dof_pos[a] + f * dof_pos[b]
-    ref_dof_vel = np.gradient(ref_dof, cdt, axis=0)
+        ref_dof_vel[i] = (1 - f) * src_dof_vel[a] + f * src_dof_vel[b]
 
-    # Anchor (torso) rotation per control frame via FK.
+    # Single FK pass over the reference: anchor (torso) rotation per control
+    # frame, plus the per-frame lowest collision point for ground alignment.
     import mujoco
 
+    coll = [g for g in range(model.ngeom)
+            if model.geom_contype[g] or model.geom_conaffinity[g]]
+    coll = [g for g in coll
+            if mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, g) != "floor"]
+
+    def _geom_bottom(g):
+        """World-space lowest point of a collision geom (exact for spheres
+        and capsules — the G1 collision set; bounding-radius fallback)."""
+        z = data.geom_xpos[g][2]
+        t = model.geom_type[g]
+        if t == mujoco.mjtGeom.mjGEOM_SPHERE:
+            return z - model.geom_size[g][0]
+        if t == mujoco.mjtGeom.mjGEOM_CAPSULE:
+            axis_z = abs(data.geom_xmat[g][8])  # local z-axis vertical extent
+            return z - (model.geom_size[g][0] + model.geom_size[g][1] * axis_z)
+        return z - model.geom_rbound[g]
+
     ref_anchor = np.zeros((n50, 4), dtype=np.float32)  # xyzw
+    ref_lowest = np.zeros(n50)
     for i in range(n50):
         data.qpos[0:3] = ref_root_pos[i]
         data.qpos[3:7] = ref_root_quat[i]
         data.qpos[7:] = ref_dof[i]
         mujoco.mj_forward(model, data)
         ref_anchor[i] = _wxyz_to_xyzw(data.xquat[anchor_idx + 1].copy())
+        ref_lowest[i] = min(_geom_bottom(g) for g in coll)
+
+    # Ground the reference before tracking (constant vertical shift so the
+    # clip's typical lowest point sits on the floor). Physics can only ever
+    # act on the real floor, so a floating (or sunken) reference would make
+    # the robot track the POSE correctly while the height gate measured the
+    # constant float as divergence and falsely rejected the result. The 5th
+    # percentile tolerates brief dips; a residual PARTIAL float (e.g. one
+    # segment sitting on a chair that isn't there) still legitimately fails.
+    ground_offset = float(np.percentile(ref_lowest, 5))
+    if abs(ground_offset) > 0.02:
+        ref_root_pos[:, 2] -= ground_offset
+    else:
+        ground_offset = 0.0
 
     # ---- ONNX session ----
     session = ort.InferenceSession(
@@ -393,6 +440,7 @@ def track_motion(root_pos, root_quat_wxyz, dof_pos, fps, robot) -> TrackingResul
         "joint_runaway_s": round(float(runaway_s), 2),
         "height_divergence_s": round(float(hdiv_s), 2),
         "travel_ratio": round(travel, 2),
+        "ref_ground_offset_m": round(ground_offset, 3),
         "realtime_factor": round(n50 * cdt / max(wall, 1e-6), 1),
     }
 
