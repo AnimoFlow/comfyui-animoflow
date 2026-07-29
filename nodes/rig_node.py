@@ -91,17 +91,33 @@ class AnimoFlowRigNode:
                 "job_id":     ("STRING",        {"default": ""}),
                 "character":  (character_names, {}),
             },
-            "optional": {},
+            "optional": {
+                # Physics-based tracking post-process. Only meaningful for
+                # robot characters that advertise support (see
+                # robot_retarget.characters.tracking_map); requesting it for
+                # an unsupported character raises loudly.
+                "physics_tracking": ("BOOLEAN", {"default": False}),
+            },
         }
 
-    def retarget_and_rig(self, bvh_b64: str, output_dir: str, job_id: str, character: str):
+    def retarget_and_rig(self, bvh_b64: str, output_dir: str, job_id: str,
+                         character: str, physics_tracking: bool = False):
         bvh_bytes = base64.b64decode(bvh_b64)
 
         if character in _robot_characters():
             from robot_retarget.characters import retarget_to_robot_fbx
 
-            fbx_bytes = retarget_to_robot_fbx(bvh_bytes, character, CHARACTERS_DIR)
+            fbx_bytes, tracking_info = retarget_to_robot_fbx(
+                bvh_bytes, character, CHARACTERS_DIR,
+                physics_tracking=physics_tracking)
+            if tracking_info is not None:
+                self._write_tracking_sidecar(output_dir, job_id, tracking_info)
             return self._save(fbx_bytes, output_dir, job_id, character)
+
+        if physics_tracking:
+            raise RuntimeError(
+                f"physics_tracking is not supported for character {character!r}"
+            )
 
         retargeter = _get_retargeter()
         fbx_template = _list_characters().get(character)
@@ -110,6 +126,21 @@ class AnimoFlowRigNode:
 
         fbx_bytes, _ = retargeter.bvh_to_fbx(bvh_bytes, fbx_template=fbx_template)
         return self._save(fbx_bytes, output_dir, job_id, character)
+
+    def _write_tracking_sidecar(self, output_dir: str, job_id: str, info: dict):
+        """Persist tracking outcome next to the output file so the API can
+        surface it on the job (same pattern as the snap-info sidecar)."""
+        import json
+
+        output_dir = (output_dir
+                      or os.environ.get("ANIMOFLOW_OUTPUT_DIR")
+                      or "/tmp/animoflow-output")
+        os.makedirs(output_dir, exist_ok=True)
+        name = f"{job_id}.tracking.json" if job_id else f"animoflow_{int(time.time())}.tracking.json"
+        with open(os.path.join(output_dir, name), "w") as f:
+            json.dump(info, f)
+        state = "applied" if info.get("applied") else "FELL BACK to kinematic"
+        print(f"[AnimoFlowRigNode] physics tracking {state}: {info.get('metrics')}")
 
     def _save(self, fbx_bytes: bytes, output_dir: str, job_id: str, character: str):
         # Empty output_dir → server-side default. Lets shipped workflows

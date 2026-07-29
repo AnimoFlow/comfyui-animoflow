@@ -31,6 +31,19 @@ def is_robot_character(name: str) -> bool:
     return name in ROBOT_CHARACTERS
 
 
+def tracking_map(names: list[str]) -> dict[str, bool]:
+    """physics-tracking support per character name (False for humanoids and
+    robots without a pretrained tracking policy). Catalog surface — clients
+    must key their tracking UI off this, never a hardcoded list."""
+    from .tracking import tracking_supported
+
+    out = {}
+    for name in names:
+        info = ROBOT_CHARACTERS.get(name)
+        out[name] = bool(info and tracking_supported(info["robot"]))
+    return out
+
+
 # Generating-model bvh22 template heights (pose-independent, meters).
 # kimodo: implied by paired displacement measurement on identical
 # generations (robot/humanoid ratio 0.835 for G1 => h = 0.835/0.9*1.8).
@@ -112,10 +125,17 @@ def retarget_to_robot_fbx(
     character: str,
     characters_dir: str | Path,
     gmr_home: str | None = None,
-) -> bytes:
-    """Full robot path: bvh22 bytes -> GMR retarget -> verified Blender bake
-    -> FBX bytes. Every frame of the bake is FK-verified against MuJoCo on a
-    sample of frames (1 mm tolerance); any mismatch raises."""
+    physics_tracking: bool = False,
+) -> tuple[bytes, dict | None]:
+    """Full robot path: bvh22 bytes -> GMR retarget -> optional physics
+    tracking -> verified Blender bake -> (FBX bytes, tracking_info).
+
+    tracking_info is None unless physics_tracking was requested; otherwise a
+    dict {requested, applied, warning, metrics} — when the tracking gate
+    rejects the result, the kinematic motion is baked and `warning` carries
+    the user-facing message (clients render it verbatim). Every frame of
+    the bake is FK-verified against MuJoCo on a sample of frames (1 mm
+    tolerance); any mismatch raises."""
     info = ROBOT_CHARACTERS.get(character)
     if info is None:
         raise RobotRetargetError(f"{character!r} is not a robot character")
@@ -130,6 +150,24 @@ def retarget_to_robot_fbx(
     from .retarget import retarget_bvh22
 
     motion = retarget_bvh22(bvh_bytes.decode("utf-8"), robot=info["robot"], gmr_home=gmr_home)
+
+    tracking_info = None
+    if physics_tracking:
+        from .tracking import track_motion
+
+        result = track_motion(
+            motion.root_pos, motion.root_quat_wxyz, motion.dof_pos,
+            motion.fps, info["robot"])
+        tracking_info = {
+            "requested": True,
+            "applied": result.applied,
+            "warning": result.warning,
+            "metrics": result.metrics,
+        }
+        if result.applied:
+            motion.root_pos = result.root_pos
+            motion.root_quat_wxyz = result.root_quat_wxyz
+            motion.dof_pos = result.dof_pos
 
     blender = os.environ.get("BLENDER_BIN", "blender")
     with tempfile.TemporaryDirectory(prefix="animoflow_robot_") as tmp:
@@ -168,4 +206,4 @@ def retarget_to_robot_fbx(
             raise RobotRetargetError(
                 f"robot bake failed for {character} ({info['robot']}): {tail}"
             )
-        return out_fbx.read_bytes()
+        return out_fbx.read_bytes(), tracking_info

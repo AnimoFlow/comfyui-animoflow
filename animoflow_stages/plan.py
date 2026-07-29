@@ -45,6 +45,7 @@ def build_plan(
     waypoints: list[dict] | None = None,
     accel_frac: float = 0.25,
     decel_frac: float = 0.25,
+    physics_tracking: bool = False,
     include_preview: bool = False,
     include_draw_input: bool = False,
     include_rewrite: bool = False,
@@ -141,7 +142,10 @@ def build_plan(
             "output_fps": output_fps,
         }))
         stages.append(StageSpec("ik", {}))
-    stages.append(StageSpec("rig", {"character": character}))
+    stages.append(StageSpec("rig", {
+        "character": character,
+        "physics_tracking": physics_tracking,
+    }))
     stages.append(StageSpec("glb_export", {
         "character": character,
         "snap_to_ground": snap_to_ground,
@@ -170,6 +174,7 @@ def build_timeline_plan(
     keyframe_builder_error_degrees: float = 3.0,
     compress_output: bool = False,
     downsize_textures: bool = False,
+    physics_tracking: bool = False,
     include_preview: bool = False,
 ) -> list[StageSpec]:
     """priorMDM double-take long-motion pipeline; same tail as build_plan."""
@@ -182,6 +187,7 @@ def build_timeline_plan(
         keyframe_builder_error_degrees=keyframe_builder_error_degrees,
         compress_output=compress_output,
         downsize_textures=downsize_textures,
+        physics_tracking=physics_tracking,
         include_preview=include_preview,
     )
     plan[0] = StageSpec("generate_timeline", {
@@ -351,6 +357,7 @@ def to_comfyui_workflow(
                 "output_dir": output_dir,
                 "job_id": job_id,
                 "character": p["character"],
+                "physics_tracking": bool(p.get("physics_tracking", False)),
             })
             rig_ref = (nid, 1)  # slot 1 = character (echo of the combo)
             prev = (nid, 0)

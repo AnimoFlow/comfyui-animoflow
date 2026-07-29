@@ -179,3 +179,53 @@ def test_build_plan_prescales_robot_waypoints():
         assert g["y"] == pytest.approx(w["y"] * scale)
         assert g["z"] == pytest.approx(w["z"] * scale)
         assert g["t"] == w["t"]
+
+
+# ---------------------------------------------------------------------------
+# Physics tracking (robot_retarget/tracking.py) — offline parts only.
+# The full rollout needs the downloaded policy assets; it runs in the
+# integration environment, not here.
+# ---------------------------------------------------------------------------
+
+
+def test_tracking_map_is_catalog_shaped():
+    from robot_retarget.characters import ROBOT_CHARACTERS, tracking_map
+
+    names = ["Y_bot", *ROBOT_CHARACTERS.keys()]
+    m = tracking_map(names)
+    assert set(m) == set(names)
+    assert m["Y_bot"] is False
+    assert m["Unitree G1"] is True     # pretrained policy exists
+    assert m["Unitree H1"] is False    # no pretrained policy anywhere
+
+
+def test_tracking_supported_registry():
+    from robot_retarget.tracking import TRACKING_ROBOTS, tracking_supported
+
+    assert tracking_supported("unitree_g1")
+    assert not tracking_supported("unitree_h1")
+    for spec in TRACKING_ROBOTS.values():
+        for url, sha in spec["assets"].values():
+            assert url.startswith("https://") and len(sha) == 64
+
+
+def test_tracking_gate_helpers():
+    import numpy as np
+    from robot_retarget.tracking import _longest_run, _quat_mul, _slerp, _yaw_offset
+
+    assert _longest_run([0, 1, 1, 1, 0, 1]) == 3
+    assert _longest_run([]) == 0
+    q = np.array([0.0, 0.0, 0.0, 1.0], dtype=np.float32)
+    np.testing.assert_allclose(_quat_mul(q, q), q, atol=1e-6)
+    np.testing.assert_allclose(_slerp(q, q, 0.5), q, atol=1e-6)
+    # identical headings -> identity yaw offset
+    off = _yaw_offset(q, q)
+    np.testing.assert_allclose(off, q, atol=1e-6)
+
+
+def test_rig_requires_supported_character_for_tracking():
+    from robot_retarget.characters import retarget_to_robot_fbx
+    from robot_retarget.gmr_runtime import RobotRetargetError
+
+    with pytest.raises(RobotRetargetError):
+        retarget_to_robot_fbx(b"", "Y_bot", "/nonexistent", physics_tracking=True)

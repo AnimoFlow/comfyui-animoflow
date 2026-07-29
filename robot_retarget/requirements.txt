@@ -7,3 +7,6 @@ qpsolvers[daqp]
 scipy
 numpy
 rich
+# Physics-tracking post-process (robot_retarget/tracking.py):
+onnxruntime
+PyYAML
