@@ -70,6 +70,39 @@ def build_plan(
     """
     from .fps import native_fps as _nfps
 
+    # Robot characters: pre-scale drawn geometry so the retargeter's root
+    # scaling lands the robot exactly on the drawn path. Uniform scaling
+    # commutes with curve canonicalization, and the restore transform
+    # (computed from the unscaled curve API-side, or from the scaled curve
+    # by the draw node) cancels against the retarget scale either way.
+    if curve_2d or waypoints:
+        try:
+            from robot_retarget.characters import path_scale
+        except ImportError:
+            # robot_retarget is a sibling package in this repo; hosts that
+            # import animoflow_stages standalone may not have the repo root
+            # on sys.path yet.
+            import sys as _sys
+            from pathlib import Path as _Path
+
+            _root = str(_Path(__file__).resolve().parents[1])
+            if _root not in _sys.path:
+                _sys.path.insert(0, _root)
+            from robot_retarget.characters import path_scale
+
+        _ps = path_scale(character, model)
+        if _ps != 1.0:
+            if curve_2d:
+                curve_2d = [[x * _ps, z * _ps] for x, z in curve_2d]
+            if waypoints:
+                # API waypoints are {x, y, z, t}; GUI draw pins are
+                # {x, z, f}. All spatial coords scale (GMR scales the
+                # full 3D root path); time keys (t / f) never do.
+                waypoints = [
+                    {**w, **{k: w[k] * _ps for k in ("x", "y", "z") if k in w}}
+                    for w in waypoints
+                ]
+
     draw_spec = None
     if include_draw_input and (curve_2d or waypoints):
         mode = "trajectory" if curve_2d else "waypoints"

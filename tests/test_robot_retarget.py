@@ -128,3 +128,54 @@ def test_unknown_robot_raises():
 
     with pytest.raises(RobotRetargetError, match="unsupported robot"):
         retarget_bvh22(synth_walk_bvh(), robot="optimus_prime")
+
+
+def test_path_scale_values():
+    from robot_retarget.characters import path_scale
+
+    # kimodo template: G1 shrinks paths to 0.835 -> input pre-scales x1.198
+    assert path_scale("Unitree G1", "kimodo") == pytest.approx(1.198, abs=0.002)
+    # H1 slightly enlarges -> input pre-scales x0.98
+    assert path_scale("Unitree H1", "kimodo") == pytest.approx(0.980, abs=0.002)
+    # humanoids and unknown models are untouched
+    assert path_scale("Y_bot", "kimodo") == 1.0
+    assert path_scale("Unitree G1", "some_future_model") == 1.0
+
+
+def test_build_plan_prescales_robot_trajectory():
+    from animoflow_stages.plan import build_plan
+    from robot_retarget.characters import path_scale
+
+    curve = [[0.0, 0.0], [0.5, 1.5], [1.0, 3.0]]
+    scale = path_scale("Unitree G1", "kimodo")
+
+    def gen_stage(plan):
+        return next(s for s in plan if s.kind == "generate")
+
+    robot = build_plan("kimodo", "Unitree G1", prompt="walk", num_frames=80,
+                       seed=1, curve_2d=[list(p) for p in curve])
+    got = gen_stage(robot).params["curve_2d"]
+    for (gx, gz), (cx, cz) in zip(got, curve):
+        assert gx == pytest.approx(cx * scale)
+        assert gz == pytest.approx(cz * scale)
+
+    human = build_plan("kimodo", "Y_bot", prompt="walk", num_frames=80,
+                       seed=1, curve_2d=[list(p) for p in curve])
+    assert gen_stage(human).params["curve_2d"] == curve
+
+
+def test_build_plan_prescales_robot_waypoints():
+    from animoflow_stages.plan import build_plan
+    from robot_retarget.characters import path_scale
+
+    wps = [{"x": 0.0, "y": 0.0, "z": 0.0, "t": 0},
+           {"x": 1.0, "y": 0.2, "z": 2.0, "t": 60}]
+    scale = path_scale("Unitree G1", "kimodo")
+    plan = build_plan("kimodo", "Unitree G1", prompt="walk", num_frames=80,
+                      seed=1, waypoints=[dict(w) for w in wps])
+    got = next(s for s in plan if s.kind == "generate").params["waypoints"]
+    for g, w in zip(got, wps):
+        assert g["x"] == pytest.approx(w["x"] * scale)
+        assert g["y"] == pytest.approx(w["y"] * scale)
+        assert g["z"] == pytest.approx(w["z"] * scale)
+        assert g["t"] == w["t"]

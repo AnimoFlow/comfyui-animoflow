@@ -31,6 +31,44 @@ def is_robot_character(name: str) -> bool:
     return name in ROBOT_CHARACTERS
 
 
+# Generating-model bvh22 template heights (pose-independent, meters).
+# kimodo: implied by paired displacement measurement on identical
+# generations (robot/humanoid ratio 0.835 for G1 => h = 0.835/0.9*1.8).
+# mdm family: measured via load_bvh22 across 20 real clips (1.711-1.721).
+# Trajectory/waypoint tasks are kimodo-only today; the rest are listed so
+# a future traj-capable model fails soft to its own entry, not kimodo's.
+TEMPLATE_HEIGHT_M = {
+    "kimodo": 1.670,
+    "mdm": 1.717,
+    "momask": 1.717,
+    "priormdm": 1.717,
+}
+
+
+def path_scale(character: str, model: str) -> float:
+    """Pre-generation multiplier for drawn trajectory/waypoint coordinates.
+
+    GMR scales the whole root trajectory by Hips_scale x template_height /
+    height_assumption (keeping stride and foot contacts consistent with the
+    robot's proportions), so a robot walks a drawn path at that factor.
+    Scaling the input by the inverse before generation lands the robot
+    exactly on the drawn path. Returns 1.0 for humanoid characters and for
+    models with no known template height.
+    """
+    import json as _json
+
+    from .gmr_runtime import SUPPORTED_ROBOTS
+
+    info = ROBOT_CHARACTERS.get(character)
+    height = TEMPLATE_HEIGHT_M.get(model)
+    if info is None or height is None:
+        return 1.0
+    cfg = _json.loads(SUPPORTED_ROBOTS[info["robot"]].read_text())
+    k = (cfg["human_scale_table"][cfg["human_root_name"]]
+         * height / cfg["human_height_assumption"])
+    return 1.0 / k
+
+
 def robot_roster(characters_dir: str | Path) -> list[str]:
     """Robot characters whose template GLB is present in characters_dir."""
     d = Path(characters_dir)
