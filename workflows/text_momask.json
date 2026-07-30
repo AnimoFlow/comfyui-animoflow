@@ -130,7 +130,7 @@
       ],
       "size": [
         400,
-        152
+        180
       ],
       "flags": {},
       "order": 3,
@@ -166,7 +166,8 @@
       "widgets_values": [
         "",
         "",
-        "Y_bot"
+        "Y_bot",
+        false
       ]
     },
     {

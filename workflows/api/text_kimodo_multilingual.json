@@ -13,7 +13,7 @@
         "1",
         0
       ],
-      "duration": 4.0,
+      "duration": 4.0167,
       "model": "Kimodo-SOMA-RP-v1",
       "output": "BVH (22-joint rig)",
       "steps": 100,
@@ -31,7 +31,8 @@
       ],
       "output_dir": "",
       "job_id": "",
-      "character": "Y_bot"
+      "character": "Y_bot",
+      "physics_tracking": false
     }
   },
   "4": {

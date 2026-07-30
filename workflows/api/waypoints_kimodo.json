@@ -3,7 +3,7 @@
     "class_type": "AnimoFlow_DrawWaypoints",
     "inputs": {
       "points_json": "[{\"x\": 0.5, \"z\": 0.5, \"f\": 0.0}, {\"x\": 1.8, \"z\": 1.4, \"f\": 0.5}, {\"x\": 2.6, \"z\": 2.6, \"f\": 1.0}]",
-      "duration": 4.0
+      "duration": 4.0167
     }
   },
   "2": {
@@ -35,7 +35,8 @@
       ],
       "output_dir": "",
       "job_id": "",
-      "character": "Y_bot"
+      "character": "Y_bot",
+      "physics_tracking": false
     }
   },
   "4": {

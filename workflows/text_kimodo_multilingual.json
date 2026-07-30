@@ -98,7 +98,7 @@
       },
       "widgets_values": [
         "a person walks forward",
-        4.0,
+        4.0167,
         "Kimodo-SOMA-RP-v1",
         "BVH (22-joint rig)",
         100,
@@ -118,7 +118,7 @@
       ],
       "size": [
         400,
-        152
+        180
       ],
       "flags": {},
       "order": 2,
@@ -154,7 +154,8 @@
       "widgets_values": [
         "",
         "",
-        "Y_bot"
+        "Y_bot",
+        false
       ]
     },
     {

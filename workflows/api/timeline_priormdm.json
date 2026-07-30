@@ -38,7 +38,8 @@
       ],
       "output_dir": "",
       "job_id": "",
-      "character": "Y_bot"
+      "character": "Y_bot",
+      "physics_tracking": false
     }
   },
   "5": {

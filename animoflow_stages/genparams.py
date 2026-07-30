@@ -115,7 +115,10 @@ def build_node_gen_inputs(
         kcfg = float(cfg) if cfg is not None else KIMODO_DEFAULT_CFG
         inputs = {
             "prompt": prompt,
-            "duration": round(num_frames / native_fps("kimodo"), 2),
+            # The Kimodo server truncates int(duration * fps); a 2-decimal duration
+            # can land one frame short and push root2d indices out of range.
+            # Bias by half a frame so the truncation reproduces num_frames exactly.
+            "duration": round((num_frames + 0.5) / native_fps("kimodo"), 4),
             "model": KIMODO_DEFAULT_MODEL,
             "output": "BVH (22-joint rig)",  # SMPL-free rotation BVH → Rig (no IK)
             "steps": KIMODO_DEFAULT_STEPS,

@@ -95,7 +95,10 @@ class TestGenParams:
         inputs = genparams.build_node_gen_inputs(
             "kimodo", prompt="p", num_frames=120, seed=1,
             waypoints=[{"x": 1, "z": 2, "t": 0}])
-        assert inputs["duration"] == 4.0  # 120 frames @ 30 fps
+        # duration carries a half-frame bias so the server's int(d * fps)
+        # reproduces num_frames exactly (see genparams)
+        assert int(inputs["duration"] * 30) == 120
+        assert abs(inputs["duration"] - 4.0) < 0.02
         assert json.loads(inputs["root2d_json"])["frame_indices"] == [0]
 
     def test_priormdm_caps_frames_and_curve(self):
@@ -401,3 +404,20 @@ def test_rewriter_e2e_real_weights():
     assert res.skipped is False
     assert res.rewritten.isascii()
     assert _looks_already_humanml3d(res.rewritten), res.rewritten
+
+
+def test_kimodo_duration_survives_server_truncation():
+    """The Kimodo server derives its clip length as int(duration * fps).
+    The duration we emit must reproduce num_frames exactly, or root2d
+    frame indices (built for num_frames) fall out of range — seen live as
+    'root2d.frame_indices out of range [0, N)' for durations like 5.14 s."""
+    from animoflow_stages.fps import native_fps
+    from animoflow_stages import genparams
+
+    fps = native_fps("kimodo")
+    for num_frames in range(60, 271):
+        inputs = genparams.build_node_gen_inputs(
+            "kimodo", prompt="a person walks", num_frames=num_frames, seed=1,
+            curve_2d=[[0.0, 0.0], [1.0, 1.0]],
+        )
+        assert int(inputs["duration"] * fps) == num_frames

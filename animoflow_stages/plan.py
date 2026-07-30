@@ -110,7 +110,9 @@ def build_plan(
         draw_spec = StageSpec("draw_input", {
             "mode": mode,
             "points": curve_2d if curve_2d else waypoints,
-            "duration": round(num_frames / _nfps(model), 2),
+            # Half-frame bias: survives the server-side int(duration * fps)
+            # truncation (see genparams kimodo inputs).
+            "duration": round((num_frames + 0.5) / _nfps(model), 4),
         })
         curve_2d = None
         waypoints = None
