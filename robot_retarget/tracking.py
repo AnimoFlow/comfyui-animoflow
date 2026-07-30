@@ -444,14 +444,9 @@ def track_motion(root_pos, root_quat_wxyz, dof_pos, fps, robot) -> TrackingResul
         "realtime_factor": round(n50 * cdt / max(wall, 1e-6), 1),
     }
 
-    if not ok:
-        return TrackingResult(
-            root_pos=np.asarray(root_pos, dtype=np.float32),
-            root_quat_wxyz=np.asarray(root_quat_wxyz, dtype=np.float32),
-            dof_pos=np.asarray(dof_pos, dtype=np.float32),
-            applied=False, warning=TRACKING_FAILED_WARNING, metrics=metrics)
-
     # ---- resample tracked 50 Hz back to the source fps ----
+    # (always computed: the debug dump below wants the tracked motion even
+    # when the gate rejects it)
     src_t = np.arange(T_src) / fps
     ctrl_t = np.arange(n50) * cdt
     idx = np.clip(np.searchsorted(ctrl_t, src_t, side="right") - 1, 0, n50 - 2)
@@ -467,6 +462,40 @@ def track_motion(root_pos, root_quat_wxyz, dof_pos, fps, robot) -> TrackingResul
         q = _slerp(qa, qb, f)
         out_quat[i] = q[[3, 0, 1, 2]]
         out_dof[i] = (1 - f) * a[7:] + f * b[7:]
+
+    # ---- optional debug dump: before / gate reference / tracked ----
+    # ANIMOFLOW_TRACKING_DEBUG_DIR=<dir> writes the three motions of this
+    # call as baker-compatible npz files (before = input kinematic motion,
+    # ref = the grounded reference the gate compares against, tracked = the
+    # raw simulator output even when the gate rejected it). Debug aid only;
+    # off by default.
+    debug_dir = os.environ.get("ANIMOFLOW_TRACKING_DEBUG_DIR")
+    if debug_dir:
+        dd = Path(debug_dir)
+        dd.mkdir(parents=True, exist_ok=True)
+        stamp = time.strftime("%H%M%S")
+        names = np.array(meta["joint_names"])
+        ref_src_pos = np.asarray(root_pos, dtype=np.float32).copy()
+        ref_src_pos[:, 2] -= ground_offset
+        for tag, (rp, rq, dp) in {
+            "before": (root_pos, root_quat_wxyz, dof_pos),
+            "ref": (ref_src_pos, root_quat_wxyz, dof_pos),
+            "tracked": (out_pos, out_quat, out_dof),
+        }.items():
+            np.savez(dd / f"tracking_{stamp}_{tag}.npz",
+                     root_pos=np.asarray(rp, dtype=np.float32),
+                     root_quat_wxyz=np.asarray(rq, dtype=np.float32),
+                     dof_pos=np.asarray(dp, dtype=np.float32),
+                     joint_names=names, fps=np.float64(fps))
+        (dd / f"tracking_{stamp}_metrics.json").write_text(
+            __import__("json").dumps({"applied": ok, **metrics}))
+
+    if not ok:
+        return TrackingResult(
+            root_pos=np.asarray(root_pos, dtype=np.float32),
+            root_quat_wxyz=np.asarray(root_quat_wxyz, dtype=np.float32),
+            dof_pos=np.asarray(dof_pos, dtype=np.float32),
+            applied=False, warning=TRACKING_FAILED_WARNING, metrics=metrics)
 
     return TrackingResult(
         root_pos=out_pos, root_quat_wxyz=out_quat, dof_pos=out_dof,
