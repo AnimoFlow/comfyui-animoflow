@@ -146,6 +146,14 @@ def retarget_bvh22(
         joint_names=joint_names,
     )
 
+    # Direct elbow transfer for the G1: the wrist-position IK favors bent
+    # elbows with high wrists; matching the human's anatomical elbow
+    # flexion directly drops the hands to natural height. G1 only; H1
+    # keeps the plain IK result. See robot_retarget/elbow_direct.py.
+    if robot == "unitree_g1":
+        from .elbow_direct import apply_direct_elbow_g1
+
+        motion = apply_direct_elbow_g1(motion, frames, gmr_home)
     if ground_align:
         from .validate import foot_metrics
 
