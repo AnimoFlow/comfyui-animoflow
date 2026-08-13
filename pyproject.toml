@@ -8,7 +8,7 @@
 [project]
 name = "comfyui-animoflow"
 description = "Text-to-motion animation pipeline for ComfyUI: SOTA motion models (MDM, priorMDM, MoMask, Kimodo) in isolated Docker containers, plus resampling, IK cleanup, character rigging, and GLB/FBX export nodes."
-version = "0.2.1"
+version = "0.2.2"
 license = { file = "LICENSE" }
 requires-python = ">=3.10"
 dependencies = [
